@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard: Consumo Industrial (2015 - 2025)</title>
+    <!-- Importação da biblioteca Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f7f6; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        h1 { 
+            text-align: center; 
+            color: #333; 
+        }
+        .dashboard-container { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        .chart-card { 
+            background: white; 
+            border-radius: 8px; 
+            padding: 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        canvas { 
+            width: 100% !important; 
+            height: 300px !important; 
+        }
+        /* Ajuste para dispositivos móveis */
+        @media (max-width: 768px) { 
+            .dashboard-container { grid-template-columns: 1fr; } 
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Dashboard: Consumo Industrial (2015 - 2025)</h1>
+    
+    <div class="dashboard-container">
+        <!-- Gráfico 1 -->
+        <div class="chart-card">
+            <canvas id="chartTrend"></canvas>
+        </div>
+        <!-- Gráfico 2 -->
+        <div class="chart-card">
+            <canvas id="chartSectors"></canvas>
+        </div>
+        <!-- Gráfico 3 -->
+        <div class="chart-card">
+            <canvas id="chartPandemic"></canvas>
+        </div>
+        <!-- Gráfico 4 -->
+        <div class="chart-card">
+            <canvas id="chartSeasonality"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Dados extraídos e agregados ---
+        
+        // Dados para o Gráfico de Linha (Evolução no Tempo)
+        const trendLabels = ['2015-01', '2015-02', '2015-03', '2015-04', '2015-05', '2015-06', '2015-07', '2015-08', '2015-09', '2015-10', '2015-11', '2015-12', '2016-01', '2016-02', '2016-03', '2016-04', '2016-05', '2016-06', '2016-07', '2016-08', '2016-09', '2016-10', '2016-11', '2016-12', '2017-01', '2017-02', '2017-03', '2017-04', '2017-05', '2017-06', '2017-07', '2017-08', '2017-09', '2017-10', '2017-11', '2017-12', '2018-01', '2018-02', '2018-03', '2018-04', '2018-05', '2018-06', '2018-07', '2018-08', '2018-09', '2018-10', '2018-11', '2018-12', '2019-01', '2019-02', '2019-03', '2019-04', '2019-05', '2019-06', '2019-07', '2019-08', '2019-09', '2019-10', '2019-11', '2019-12', '2020-01', '2020-02', '2020-03', '2020-04', '2020-05', '2020-06', '2020-07', '2020-08', '2020-09', '2020-10', '2020-11', '2020-12', '2021-01', '2021-02', '2021-03', '2021-04', '2021-05', '2021-06', '2021-07', '2021-08', '2021-09', '2021-10', '2021-11', '2021-12', '2022-01', '2022-02', '2022-03', '2022-04', '2022-05', '2022-06', '2022-07', '2022-08', '2022-09', '2022-10', '2022-11', '2022-12', '2023-01', '2023-02', '2023-03', '2023-04', '2023-05', '2023-06', '2023-07', '2023-08', '2023-09', '2023-10', '2023-11', '2023-12', '2024-01', '2024-02', '2024-03', '2024-04', '2024-05', '2024-06', '2024-07', '2024-08', '2024-09', '2024-10', '2024-11', '2024-12', '2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12'];
+        const trendData = [3836400, 4190185, 4167340, 4279334, 4075590, 4022297, 3912433, 4031809, 3974862, 3992577, 4037790, 3891001, 3437156, 3780370, 3879060, 3938317, 3822718, 3837987, 3903471, 3925453, 3916948, 3883004, 3901993, 3808220, 3525799, 3767044, 3783232, 4043806, 3759958, 3948025, 3918867, 3954618, 4116040, 3970797, 4100585, 4040088, 3772456, 3959583, 4063163, 4140811, 3980218, 3886868, 3995275, 4101064, 4122392, 4099471, 4176457, 3961544, 3799690, 3910340, 3934181, 3938488, 3983272, 3895933, 3839146, 3895954, 3962421, 4093742, 4031752, 3759052, 3592507, 3806261, 3934864, 3338959, 3062389, 3284035, 3654984, 3951040, 4097826, 4211366, 4197022, 4092019, 4181771, 4130239, 4261232, 4279930, 4161008, 4193112, 4196141, 4226538, 4312841, 4327537, 4325015, 4196157, 4044695, 4070916, 4239718, 4380182, 4285151, 4249102, 4281941, 4357635, 4378364, 4275145, 4217231, 4048188, 3797031, 3978177, 3989463, 4179454, 4006423, 4128274, 4095469, 4186209, 4295116, 4263857, 4338009, 4197424, 3978822, 4209423, 4242280, 4382018, 4426780, 4368309, 4309672, 4496780, 4530038, 4422833, 4566107, 4378251, 4121114, 4330941, 4339438, 4372567, 4382735, 4378880, 4293063, 4445205, 4408489, 4452914, 4534533, 4249059];
+        
+        // Dados para o Top 10 Setores (Barras Horizontais)
+        const sectorLabels = ['METALURGIA', 'FABRICAÇÃO DE PRODUTOS QUÍMICO...', 'FABRICAÇÃO DE PRODUTOS ALIMENT...', 'FABRICAÇÃO DE PRODUTOS DE BORR...', 'FABRICAÇÃO DE PRODUTOS DE MINE...', 'FABRICAÇÃO DE VEÍCULOS AUTOMOT...', 'FABRICAÇÃO DE CELULOSE, PAPEL ...', 'FABRICAÇÃO DE PRODUTOS DE META...', 'FABRICAÇÃO DE PRODUTOS TÊXTEIS', 'FABRICAÇÃO DE MÁQUINAS E EQUIP...'];
+        const sectorData = [98080952, 77191368, 53983777, 47431645, 45633248, 40402626, 40341518, 22056613, 21734315, 12507126];
+        
+        // Dados para a Média por Período de Pandemia
+        const panLabels = ['Pré-pandemia', 'Pandemia', 'Pós-pandemia'];
+        const panData = [107532, 101854, 115177];
+        
+        // Dados para a Sazonalidade (Média por Mês)
+        const mesLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        const mesData = [103919, 108971, 110701, 111787, 108509, 108849, 109630, 112524, 113584, 113283, 114350, 109903];
+
+        // --- 2. Renderização dos Gráficos ---
+
+        // Gráfico 1: Evolução do Consumo Total
+        new Chart(document.getElementById('chartTrend'), {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'Consumo Total',
+                    data: trendData,
+                    borderColor: '#4c72b0',
+                    backgroundColor: 'rgba(76, 114, 176, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    pointRadius: 0,
+                    tension: 0.1
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { title: { display: true, text: 'Evolução do Consumo Total ao Longo do Tempo' } } 
+            }
+        });
+
+        // Gráfico 2: Top 10 Setores
+        new Chart(document.getElementById('chartSectors'), {
+            type: 'bar',
+            data: {
+                labels: sectorLabels,
+                datasets: [{
+                    label: 'Consumo Acumulado',
+                    data: sectorData,
+                    backgroundColor: '#55a868'
+                }]
+            },
+            options: { 
+                indexAxis: 'y', 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { title: { display: true, text: 'Top 10 Setores com Maior Consumo' }, legend: { display: false } } 
+            }
+        });
+
+        // Gráfico 3: Período de Pandemia
+        new Chart(document.getElementById('chartPandemic'), {
+            type: 'bar',
+            data: {
+                labels: panLabels,
+                datasets: [{
+                    label: 'Consumo Médio',
+                    data: panData,
+                    backgroundColor: ['#4c1d4b', '#b03a2e', '#e67e22']
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { title: { display: true, text: 'Média de Consumo por Período de Pandemia' }, legend: { display: false } } 
+            }
+        });
+
+        // Gráfico 4: Sazonalidade
+        new Chart(document.getElementById('chartSeasonality'), {
+            type: 'bar',
+            data: {
+                labels: mesLabels,
+                datasets: [{
+                    label: 'Consumo Médio',
+                    data: mesData,
+                    backgroundColor: '#64b5cd'
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { title: { display: true, text: 'Sazonalidade: Consumo Médio por Mês' }, legend: { display: false } } 
+            }
+        });
+    </script>
+</body>
+</html>
