@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Consumo industrial de energia elétrica — São Paulo (2015–2025)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --amber: #E8A317;
+      --amber-soft: #FFF3D6;
+      --navy: #2F62C8;
+      --navy-2: #3D7BD9;
+      --alert: #E05A4F;
+      --growth: #2E9E62;
+      --bg: #F4F7FB;
+      --panel: #FFFFFF;
+      --stroke: #D9E2EF;
+      --text: #1C2B44;
+      --muted: #5C6B82;
+      --grid: rgba(28, 43, 68, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .kpi-value {
+      font-family: Barlow, "IBM Plex Sans", sans-serif;
+    }
+
+    .wrap { width: min(1280px, calc(100% - 24px)); margin: 0 auto; padding: 16px 0 56px; }
+
+    header.hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: end;
+      padding: 6px 0 18px;
+      border-bottom: 1px solid var(--stroke);
+    }
+    .eyebrow {
+      color: #C4840D;
+      letter-spacing: 0.12em;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.35rem, 4vw, 2.1rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: #16325C;
+    }
+    .research-q {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+      font-size: clamp(13px, 2.4vw, 15px);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--amber-soft);
+      color: #8A5A00;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .howto {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .howto div {
+      background: #fff;
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .howto strong { display: block; color: var(--navy); margin-bottom: 4px; font-size: 13px; }
+    .howto span { color: var(--muted); font-size: 12.5px; }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 160px 160px minmax(0, 1fr);
+      gap: 12px;
+      align-items: end;
+      margin: 0 0 12px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .filters label, .picker-head span {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    select, button, input {
+      font: inherit;
+      color: var(--text);
+    }
+    select, input[type="search"] {
+      width: 100%;
+      background: #F8FAFD;
+      border: 1px solid var(--stroke);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .btn {
+      background: #fff;
+      border: 1px solid var(--stroke);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: var(--navy); color: var(--navy); }
+    .btn-amber {
+      background: var(--amber);
+      color: #1A1A2E;
+      border: 0;
+      font-weight: 700;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .check {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text);
+      margin: 0;
+      padding-bottom: 8px;
+    }
+
+    .picker {
+      grid-column: 1 / -1;
+      position: relative;
+    }
+    .picker-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .setor-count { font-size: 12.5px; color: var(--muted); }
+    .setor-painel {
+      display: none;
+      margin-top: 10px;
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      background: #F8FAFD;
+      padding: 10px;
+    }
+    .setor-painel.open { display: block; }
+    .setor-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 260px;
+      overflow-y: auto;
+      margin-top: 8px;
+    }
+    .chip {
+      border: 1px solid var(--stroke);
+      background: #fff;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      line-height: 1.3;
+    }
+    .chip.selected {
+      background: #E8F0FF;
+      border-color: var(--navy);
+      color: #16325C;
+      font-weight: 600;
+    }
+    .chip.hidden { display: none; }
+    .selecionados-fila {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 8px 0 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    .selecionados-fila:empty { display: none; }
+    .tag-sel {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #E8F0FF;
+      border: 1px solid var(--navy);
+      color: #16325C;
+      border-radius: 999px;
+      padding: 4px 8px 4px 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .tag-sel button {
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: #16325C;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0 2px;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 8px 0 16px;
+    }
+    .kpi {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: 14px;
+      padding: 14px;
+      min-width: 0;
+    }
+    .kpi-label { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .kpi-value {
+      font-size: clamp(16px, 2.2vw, 22px);
+      font-weight: 700;
+      margin: 0 0 6px;
+      color: #C4840D;
+      overflow-wrap: anywhere;
+    }
+    .kpi-value.pos { color: var(--growth); }
+    .kpi-value.neg { color: var(--alert); }
+    .kpi-sub { color: var(--muted); font-size: 12px; }
+
+    section.block {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      min-width: 0;
+    }
+    section.block h2 {
+      margin: 0 0 4px;
+      font-size: clamp(16px, 2.4vw, 18px);
+      font-weight: 650;
+      color: #16325C;
+    }
+    .sec-lead { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+    .chart-box { position: relative; height: 340px; }
+    .chart-box.timeline { height: 380px; }
+    .chart-box.donut { height: 460px; }
+    .chart-box.med { height: 320px; }
+    .chart-box.tall { height: 560px; }
+    .chart-box.compare { height: 420px; }
+    .grid-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+    .grid-2 > * { min-width: 0; }
+    .grid-stack { display: grid; grid-template-columns: 1fr; gap: 18px; }
+
+    .legend-inline { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .band { display: inline-block; width: 16px; height: 9px; background: rgba(224, 90, 79, 0.22); border: 1px solid var(--alert); margin-right: 6px; vertical-align: middle; }
+
+    table.data {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    table.data th, table.data td {
+      padding: 8px;
+      border-bottom: 1px solid var(--stroke);
+      text-align: left;
+      vertical-align: top;
+    }
+    table.data th {
+      cursor: pointer;
+      color: var(--navy);
+      font-weight: 600;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      background: #fff;
+    }
+    table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .table-wrap { max-height: 420px; overflow: auto; -webkit-overflow-scrolling: touch; }
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .tag.up { background: #E5F7EC; color: #1C7A45; }
+    .tag.flat { background: #EEF2F7; color: #4A5A70; }
+    .tag.down { background: #FDECEC; color: #B42318; }
+
+    .heatmap { overflow: auto; border-radius: 10px; -webkit-overflow-scrolling: touch; }
+    .heatmap table { border-collapse: collapse; min-width: 640px; width: 100%; }
+    .heatmap th, .heatmap td {
+      font-size: 10.5px;
+      padding: 6px 4px;
+      text-align: center;
+      border: 1px solid #EDF2F8;
+    }
+    .heatmap th { color: var(--muted); font-weight: 500; background: #F8FAFD; }
+
+    .insights { background: #FFFBF2; border-color: #F0D59A; }
+    .insights ul { margin: 8px 0 0; padding-left: 18px; }
+    .insights li { margin: 8px 0; color: var(--text); }
+
+    .grow-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .list-card h3 { margin: 0 0 10px; font-size: 14px; }
+    .bar-row { display: grid; grid-template-columns: minmax(0, 1fr) 90px; gap: 8px; align-items: center; margin: 6px 0; font-size: 12px; }
+    .track { height: 10px; background: #EEF2F7; border-radius: 99px; overflow: hidden; }
+    .fill { height: 100%; border-radius: 99px; }
+
+    footer { color: var(--muted); font-size: 12px; margin-top: 10px; }
+
+    .empty-hint {
+      background: #F8FAFD;
+      border: 1px dashed var(--stroke);
+      border-radius: 10px;
+      padding: 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 1100px) {
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .filters { grid-template-columns: 1fr 1fr; }
+      .filters .check-wrap { grid-column: 1 / -1; }
+      .grid-2, .grow-list, .howto { grid-template-columns: 1fr; }
+      .kpis .kpi:last-child { grid-column: 1 / -1; }
+    }
+    @media (max-width: 700px) {
+      .wrap { width: min(100% - 16px, 1280px); }
+      .kpis { grid-template-columns: 1fr; }
+      .kpis .kpi:last-child { grid-column: auto; }
+      header.hero { grid-template-columns: 1fr; }
+      .filters { grid-template-columns: 1fr 1fr; }
+      .badge { justify-self: start; }
+      .chart-box, .chart-box.med, .chart-box.stack  { height: 280px; }
+      .chart-box.timeline { height: 320px; }
+      .chart-box.tall, .chart-box.compare { height: 420px; }
+      table.data { font-size: 12px; }
+    }
+
+    @media print {
+      body { background: #fff; color: #111; }
+      .kpi, section.block { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="filters">
+      <div>
+        <label for="anoDe">Ano inicial</label>
+        <select id="anoDe"></select>
+      </div>
+      <div>
+        <label for="anoAte">Ano final</label>
+        <select id="anoAte"></select>
+      </div>
+      <div class="check-wrap">
+        <label class="check">
+          <input type="checkbox" id="restringirSetores" />
+          Usar só os setores marcados em todo o painel
+        </label>
+      </div>
+      <div class="picker">
+        <div class="picker-head"><span>Setores para comparar</span></div>
+        <div class="picker-tools">
+          <button class="btn-amber" id="btnAbrirSetores" type="button">Selecionar / buscar setores</button>
+          <button class="btn" id="btnLimparOverlay" type="button">Limpar seleção</button>
+          <span class="setor-count" id="setorCount">0 marcados — mostrando o total da indústria</span>
+        </div>
+        <div class="setor-painel" id="setorPainel">
+          <input type="search" id="buscaSetor" placeholder="Digite para filtrar a lista (ex.: química, metalurgia)..." />
+          <div class="picker-tools" style="margin-top:8px">
+            <button class="btn" id="btnTodos" type="button">Marcar visíveis</button>
+            <button class="btn" id="btnFecharSetores" type="button">Fechar lista</button>
+          </div>
+          <div class="setor-lista" id="setorChips"></div>
+        </div>
+        <div class="selecionados-fila" id="setoresSelecionados"></div>
+      </div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <section class="block">
+      <h2>Linha do tempo mensal (2015–2025)</h2>
+      <p class="sec-lead">
+        Consumo total mensal (soma dos setores do universo). A faixa vermelha marca 2020 (pandemia),
+        quando se espera a inflexão. Passe o mouse para valores exatos.
+      </p>
+      <div class="legend-inline">
+        <span><i class="dot" style="background:#E8A317"></i>Total mensal</span>
+        <span><i class="band"></i>Período pandemia (2020)</span>
+        <span>Setores marcados aparecem como linhas coloridas para comparação</span>
+      </div>
+      <div class="chart-box timeline"><canvas id="chartTimeline"></canvas></div>
+    </section>
+
+    <section class="block" id="blocoComparacao">
+      <h2>Comparação dos setores selecionados</h2>
+      <p class="sec-lead">
+        Média mensal e evolução dos setores que você marcou. Abra a busca e escolha pelo menos dois.
+      </p>
+      <div id="comparacaoVazio" class="empty-hint">Nenhum setor marcado. Clique em "Selecionar / buscar setores" e escolha, por exemplo, Metalurgia e Química.</div>
+      <div id="comparacaoConteudo" hidden>
+        <div class="grid-stack">
+          <div class="chart-box compare"><canvas id="chartComparacao"></canvas></div>
+          <div class="chart-box compare"><canvas id="chartComparacaoPeriodo"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Pré-pandemia × pandemia × pós-pandemia</h2>
+      <p class="sec-lead">
+        Média mensal do consumo total em cada regime temporal, e os 10 maiores setores (por consumo no recorte)
+        em barras agrupadas. A tabela mostra a variação percentual da média mensal pós vs pré.
+      </p>
+      <div class="grid-2">
+        <div>
+          <div class="chart-box med"><canvas id="chartPeriodos"></canvas></div>
+        </div>
+        <div>
+          <div class="chart-box compare"><canvas id="chartPeriodosTop"></canvas></div>
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="data" id="tabelaPeriodos">
+          <thead>
+            <tr>
+              <th>Setor</th>
+              <th class="num">Média pré (MWh)</th>
+              <th class="num">Média pandemia (MWh)</th>
+              <th class="num">Média pós (MWh)</th>
+              <th class="num">Δ pandemia vs pré</th>
+              <th class="num">Δ pós vs pré</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Consumo Médio Mensal (Janeiro a Dezembro) e Evolução do Consumo ao Longo dos Anos</h2>
+      <p class="sec-lead">
+        Média do consumo total por mês civil (Jan–Dez), agregando os anos do recorte.
+        O heatmap Ano × Mês combina sazonalidade e tendência: células mais claras/âmbar indicam maior consumo.
+      </p>
+      <div class="grid-2">
+        <div class="chart-box med"><canvas id="chartSazonal"></canvas></div>
+        <div>
+          <div class="heatmap" id="heatmap"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Ranking e composição setorial</h2>
+      <p class="sec-lead">
+        Os 15 setores de maior consumo médio mensal, e a participação percentual dos principais CNAEs no total do recorte.
+        Os demais setores são agrupados em "Outros" para evitar fatias excessivas. A tabela abaixo lista todos os setores.
+      </p>
+      <div class="grid-2">
+        <div class="chart-box tall"><canvas id="chartRanking"></canvas></div>
+          <div class="chart-box stack"><canvas id="chartComposicao"></canvas></div>
+      </div>
+      <div class="table-wrap" style="margin-top:14px">
+        <table class="data" id="tabelaSetores">
+          <thead>
+            <tr>
+              <th data-key="setor">Setor</th>
+              <th class="num" data-key="media">Consumo médio mensal (MWh)</th>
+              <th class="num" data-key="total">Consumo total (MWh)</th>
+              <th class="num" data-key="var">Variação % (1º vs último ano)</th>
+              <th data-key="classe">Classificação</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Tendência e crescimento</h2>
+      <p class="sec-lead">
+        Taxa de crescimento simples entre o primeiro e o último ano do recorte, e tendência linear anual
+        (inclinação da regressão consumo anual ~ ano). O scatter cruza tamanho (consumo médio) com variação %,
+        o quadrante superior direito reúne setores grandes e em expansão.
+      </p>
+      <div class="grow-list">
+        <div class="list-card">
+          <h3 style="color:var(--growth)">5 setores que mais cresceram</h3>
+          <div id="topCresc"></div>
+        </div>
+        <div class="list-card">
+          <h3 style="color:var(--alert)">5 setores que mais caíram</h3>
+          <div id="topQueda"></div>
+        </div>
+      </div>
+      <div class="chart-box" style="margin-top:16px"><canvas id="chartScatter"></canvas></div>
+    </section>
+    <footer>
+      Fonte: base_dashboard_sp_2015_2025.csv · 37 setores industriais (CNAE) · consumo mensal em MWh.
+      <footer>   Projeto Integrador II - Consumo industrial de energia elétrica — São Paulo (2015–2025) </footer>
+      <footer> Grupo: João Paulo Fernandes Marques da Silva, Rafaela dos Santos Neves, Suany Milena da Silva Rosa</footer>
+    
+    </footer>
+  </div>
+
+  <script>
+    /* PAYLOAD: compact JSON {setores, codigos, rows:[ano, mes, setorIdx, consumo]} */
+window.__DASHBOARD_PAYLOAD__ = {"setores":["ATIVIDADES DE APOIO À EXTRAÇÃO DE MINERAIS","CAPTAÇÃO, TRATAMENTO E DISTRIBUIÇÃO DE ÁGUA","COLETA, TRATAMENTO E DISPOSIÇÃO DE RESÍDUOS; RECUPERAÇÃO DE MATERIAIS","CONFECÇÃO DE ARTIGOS DO VESTUÁRIO E ACESSÓRIOS","CONSTRUÇÃO DE EDIFÍCIOS","DESCONTAMINAÇÃO E OUTROS SERVIÇOS DE GESTÃO DE RESÍDUOS","ELETRICIDADE, GÁS E OUTRAS UTILIDADES","ESGOTO E ATIVIDADES RELACIONADAS","EXTRAÇÃO DE CARVÃO MINERAL","EXTRAÇÃO DE MINERAIS METÁLICOS","EXTRAÇÃO DE MINERAIS NÃO-METÁLICOS","EXTRAÇÃO DE PETRÓLEO E GÁS NATURAL","FABRICAÇÃO DE BEBIDAS","FABRICAÇÃO DE CELULOSE, PAPEL E PRODUTOS DE PAPEL","FABRICAÇÃO DE COQUE, DE PRODUTOS DERIVADOS DO PETRÓLEO E DE BIOCOMBUSTÍVEIS","FABRICAÇÃO DE EQUIPAMENTOS DE INFORMÁTICA, PRODUTOS ELETRÔNICOS E ÓPTICOS","FABRICAÇÃO DE MÁQUINAS E EQUIPAMENTOS","FABRICAÇÃO DE MÁQUINAS, APARELHOS E MATERIAIS ELÉTRICOS","FABRICAÇÃO DE MÓVEIS","FABRICAÇÃO DE OUTROS EQUIPAMENTOS DE TRANSPORTE, EXCETO VEÍCULOS AUTOMOTORES","FABRICAÇÃO DE PRODUTOS ALIMENTÍCIOS","FABRICAÇÃO DE PRODUTOS DE BORRACHA E DE MATERIAL PLÁSTICO","FABRICAÇÃO DE PRODUTOS DE MADEIRA","FABRICAÇÃO DE PRODUTOS DE METAL, EXCETO MÁQUINAS E EQUIPAMENTOS","FABRICAÇÃO DE PRODUTOS DE MINERAIS NÃO-METÁLICOS","FABRICAÇÃO DE PRODUTOS DIVERSOS","FABRICAÇÃO DE PRODUTOS DO FUMO","FABRICAÇÃO DE PRODUTOS FARMOQUÍMICOS E FARMACÊUTICOS","FABRICAÇÃO DE PRODUTOS QUÍMICOS","FABRICAÇÃO DE PRODUTOS TÊXTEIS","FABRICAÇÃO DE VEÍCULOS AUTOMOTORES, REBOQUES E CARROCERIAS","IMPRESSÃO E REPRODUÇÃO DE GRAVAÇÕES","MANUTENÇÃO, REPARAÇÃO E INSTALAÇÃO DE MÁQUINAS E EQUIPAMENTOS","METALURGIA","OBRAS DE INFRA-ESTRUTURA","PREPARAÇÃO DE COUROS E FABRICAÇÃO DE ARTEFATOS DE COURO, ARTIGOS PARA VIAGEM E CALÇADOS","SERVIÇOS ESPECIALIZADOS PARA CONSTRUÇÃO"],"codigos":[9,36,38,14,41,39,35,37,5,7,8,6,11,17,19,26,28,27,31,30,10,22,16,25,23,32,12,21,20,13,29,18,33,24,42,15,43],"rows":[[2015,1,0,2129.0],[2015,2,0,2147.0],[2015,3,0,2089.0],[2015,4,0,2355.0],[2015,5,0,2342.0],[2015,6,0,2318.0],[2015,7,0,2553.0],[2015,8,0,2750.0],[2015,9,0,2593.0],[2015,10,0,2943.0],[2015,11,0,2616.0],[2015,12,0,2333.0],[2016,1,0,1764.0],[2016,2,0,1709.0],[2016,3,0,2055.0],[2016,4,0,2275.0],[2016,5,0,1527.0],[2016,6,0,2264.0],[2016,7,0,2284.0],[2016,8,0,1921.0],[2016,9,0,2210.0],[2016,10,0,2027.0],[2016,11,0,2121.0],[2016,12,0,1985.0],[2017,1,0,1756.0],[2017,2,0,1771.0],[2017,3,0,1521.0],[2017,4,0,2189.0],[2017,5,0,1744.0],[2017,6,0,2037.0],[2017,7,0,2120.0],[2017,8,0,2286.0],[2017,9,0,2298.0],[2017,10,0,2266.0],[2017,11,0,2220.0],[2017,12,0,2231.0],[2018,1,0,1633.0],[2018,2,0,1656.16],[2018,3,0,1700.78],[2018,4,0,1990.63],[2018,5,0,2043.95],[2018,6,0,1862.02],[2018,7,0,2108.2],[2018,8,0,2279.7],[2018,9,0,2332.36],[2018,10,0,2239.88],[2018,11,0,2300.74],[2018,12,0,2178.45],[2019,1,0,1879.2],[2019,2,0,1946.26],[2019,3,0,2225.44],[2019,4,0,2195.49],[2019,5,0,2311.63],[2019,6,0,2196.35],[2019,7,0,2438.82],[2019,8,0,2207.76],[2019,9,0,2306.2],[2019,10,0,2463.79],[2019,11,0,2394.18],[2019,12,0,1813.62],[2020,1,0,1808.33],[2020,2,0,1891.73],[2020,3,0,2507.93],[2020,4,0,2291.46],[2020,5,0,2402.66],[2020,6,0,2527.74],[2020,7,0,2353.11],[2020,8,0,2540.15],[2020,9,0,2511.4],[2020,10,0,2720.09],[2020,11,0,2642.95],[2020,12,0,2004.51],[2021,1,0,2692.88],[2021,2,0,2717.47],[2021,3,0,2476.68],[2021,4,0,2628.38],[2021,5,0,2503.4],[2021,6,0,2533.8],[2021,7,0,2555.52],[2021,8,0,2531.51],[2021,9,0,2543.66],[2021,10,0,2545.64],[2021,11,0,2539.37],[2021,12,0,2545.37],[2022,1,0,2185.84],[2022,2,0,2424.71],[2022,3,0,2429.26],[2022,4,0,2711.99],[2022,5,0,2434.79],[2022,6,0,2532.86],[2022,7,0,2487.21],[2022,8,0,2538.88],[2022,9,0,2628.59],[2022,10,0,2439.55],[2022,11,0,2431.95],[2022,12,0,2455.1],[2023,1,0,2196.54],[2023,2,0,2382.73],[2023,3,0,2122.22],[2023,4,0,2584.87],[2023,5,0,2396.25],[2023,6,0,2309.28],[2023,7,0,2415.91],[2023,8,0,2586.31],[2023,9,0,2719.82],[2023,10,0,2670.96],[2023,11,0,2875.08],[2023,12,0,2791.34],[2024,1,0,2420.37],[2024,2,0,2446.38],[2024,3,0,2248.83],[2024,4,0,2520.12],[2024,5,0,2670.58],[2024,6,0,2650.4],[2024,7,0,2402.4],[2024,8,0,2801.57],[2024,9,0,2593.23],[2024,10,0,2513.45],[2024,11,0,2629.83],[2024,12,0,2345.19],[2025,1,0,2131.87],[2025,2,0,2383.31],[2025,3,0,2127.2],[2025,4,0,2254.29],[2025,5,0,2191.2],[2025,6,0,2253.4],[2025,7,0,2263.93],[2025,8,0,2384.14],[2025,9,0,2388.29],[2025,10,0,2176.29],[2025,11,0,2654.6],[2025,12,0,2370.9],[2015,1,1,1640.0],[2015,2,1,1527.0],[2015,3,1,1452.0],[2015,4,1,1554.0],[2015,5,1,1584.0],[2015,6,1,1643.0],[2015,7,1,1638.0],[2015,8,1,1350.0],[2015,9,1,1770.0],[2015,10,1,1681.0],[2015,11,1,1463.0],[2015,12,1,1189.0],[2016,1,1,1551.0],[2016,2,1,1413.0],[2016,3,1,1339.0],[2016,4,1,1492.0],[2016,5,1,1459.0],[2016,6,1,1426.0],[2016,7,1,1465.0],[2016,8,1,1592.0],[2016,9,1,1625.0],[2016,10,1,1479.0],[2016,11,1,1534.0],[2016,12,1,1088.0],[2017,1,1,18494.0],[2017,2,1,5774.0],[2017,3,1,1406.0],[2017,4,1,5811.0],[2017,5,1,5604.0],[2017,6,1,5763.0],[2017,7,1,5466.0],[2017,8,1,5774.0],[2017,9,1,5756.0],[2017,10,1,5832.0],[2017,11,1,5846.0],[2017,12,1,5570.0],[2018,1,1,5845.8],[2018,2,1,5415.1],[2018,3,1,5994.7],[2018,4,1,5777.2],[2018,5,1,5834.97],[2018,6,1,5639.41],[2018,7,1,5834.41],[2018,8,1,6002.58],[2018,9,1,5992.46],[2018,10,1,5984.7],[2018,11,1,5919.1],[2018,12,1,6152.36],[2019,1,1,6276.06],[2019,2,1,5691.02],[2019,3,1,3240.21],[2019,4,1,3413.71],[2019,5,1,2988.96],[2019,6,1,2882.6],[2019,7,1,2789.19],[2019,8,1,2990.23],[2019,9,1,3029.81],[2019,10,1,1492.36],[2019,11,1,1575.01],[2019,12,1,1481.99],[2020,1,1,1439.45],[2020,2,1,1366.76],[2020,3,1,1272.28],[2020,4,1,1337.2],[2020,5,1,1298.63],[2020,6,1,1681.7],[2020,7,1,1654.99],[2020,8,1,779.27],[2020,9,1,804.25],[2020,10,1,2288.3],[2020,11,1,820.18],[2020,12,1,860.92],[2021,1,1,967.27],[2021,2,1,843.81],[2021,3,1,883.3],[2021,4,1,823.9],[2021,5,1,799.72],[2021,6,1,792.02],[2021,7,1,787.82],[2021,8,1,1003.83],[2021,9,1,978.11],[2021,10,1,985.13],[2021,11,1,986.62],[2021,12,1,1053.63],[2022,1,1,1054.6],[2022,2,1,966.52],[2022,3,1,861.75],[2022,4,1,807.58],[2022,5,1,765.73],[2022,6,1,761.9],[2022,7,1,779.68],[2022,8,1,761.98],[2022,9,1,754.54],[2022,10,1,812.19],[2022,11,1,798.29],[2022,12,1,885.97],[2023,1,1,1787.65],[2023,2,1,1686.06],[2023,3,1,1625.47],[2023,4,1,7765.15],[2023,5,1,7992.27],[2023,6,1,6430.38],[2023,7,1,6496.07],[2023,8,1,8880.34],[2023,9,1,9496.89],[2023,10,1,9015.57],[2023,11,1,8284.56],[2023,12,1,7441.58],[2024,1,1,6158.44],[2024,2,1,6624.52],[2024,3,1,6983.36],[2024,4,1,6008.87],[2024,5,1,3922.17],[2024,6,1,5223.74],[2024,7,1,5221.02],[2024,8,1,5435.61],[2024,9,1,5622.66],[2024,10,1,5517.35],[2024,11,1,5648.46],[2024,12,1,5610.74],[2025,1,1,5689.34],[2025,2,1,5543.98],[2025,3,1,5697.05],[2025,4,1,5486.14],[2025,5,1,5431.18],[2025,6,1,5527.16],[2025,7,1,1374.9],[2025,8,1,1387.43],[2025,9,1,1330.91],[2025,10,1,1468.99],[2025,11,1,1362.4],[2025,12,1,1256.0],[2015,1,2,9990.0],[2015,2,2,11271.0],[2015,3,2,11354.0],[2015,4,2,11566.0],[2015,5,2,11585.0],[2015,6,2,11263.0],[2015,7,2,11569.0],[2015,8,2,11975.0],[2015,9,2,11659.0],[2015,10,2,12248.0],[2015,11,2,11109.0],[2015,12,2,11737.0],[2016,1,2,6431.0],[2016,2,2,8129.0],[2016,3,2,8565.0],[2016,4,2,8830.0],[2016,5,2,8357.0],[2016,6,2,8719.0],[2016,7,2,8642.0],[2016,8,2,8463.0],[2016,9,2,9071.0],[2016,10,2,8409.0],[2016,11,2,8656.0],[2016,12,2,8548.0],[2017,1,2,8690.0],[2017,2,2,9667.0],[2017,3,2,10204.0],[2017,4,2,11503.0],[2017,5,2,10111.0],[2017,6,2,11584.0],[2017,7,2,10878.0],[2017,8,2,11266.0],[2017,9,2,11776.0],[2017,10,2,10894.0],[2017,11,2,11478.0],[2017,12,2,11688.0],[2018,1,2,9267.48],[2018,2,2,11050.31],[2018,3,2,11084.89],[2018,4,2,11660.41],[2018,5,2,12064.2],[2018,6,2,12171.2],[2018,7,2,12160.86],[2018,8,2,12441.02],[2018,9,2,13488.48],[2018,10,2,11984.08],[2018,11,2,12808.23],[2018,12,2,12621.02],[2019,1,2,9944.01],[2019,2,2,11702.15],[2019,3,2,12511.52],[2019,4,2,11853.68],[2019,5,2,12035.64],[2019,6,2,12224.83],[2019,7,2,11652.5],[2019,8,2,13457.7],[2019,9,2,14356.09],[2019,10,2,13113.94],[2019,11,2,13387.65],[2019,12,2,13533.31],[2020,1,2,10378.18],[2020,2,2,12987.87],[2020,3,2,13616.87],[2020,4,2,12185.82],[2020,5,2,11359.0],[2020,6,2,12155.23],[2020,7,2,15228.88],[2020,8,2,14162.86],[2020,9,2,15109.67],[2020,10,2,14119.88],[2020,11,2,13841.28],[2020,12,2,12702.08],[2021,1,2,10643.18],[2021,2,2,11208.38],[2021,3,2,11621.58],[2021,4,2,11781.35],[2021,5,2,11404.53],[2021,6,2,11429.37],[2021,7,2,11354.82],[2021,8,2,11680.62],[2021,9,2,11687.0],[2021,10,2,11361.2],[2021,11,2,11645.28],[2021,12,2,11460.98],[2022,1,2,9923.48],[2022,2,2,10308.66],[2022,3,2,10018.32],[2022,4,2,11192.73],[2022,5,2,10398.87],[2022,6,2,10775.79],[2022,7,2,10861.16],[2022,8,2,10893.77],[2022,9,2,11517.17],[2022,10,2,11131.7],[2022,11,2,11182.93],[2022,12,2,11085.01],[2023,1,2,9963.03],[2023,2,2,11687.21],[2023,3,2,11338.92],[2023,4,2,12551.32],[2023,5,2,11653.79],[2023,6,2,12261.49],[2023,7,2,12113.83],[2023,8,2,12289.29],[2023,9,2,13411.76],[2023,10,2,12141.18],[2023,11,2,12404.16],[2023,12,2,11823.48],[2024,1,2,10267.92],[2024,2,2,11938.7],[2024,3,2,12183.39],[2024,4,2,12312.2],[2024,5,2,12999.84],[2024,6,2,13082.51],[2024,7,2,12737.57],[2024,8,2,14348.72],[2024,9,2,13785.01],[2024,10,2,14636.13],[2024,11,2,17711.44],[2024,12,2,16142.46],[2025,1,2,13998.23],[2025,2,2,16225.14],[2025,3,2,15478.15],[2025,4,2,16701.07],[2025,5,2,16256.1],[2025,6,2,17828.91],[2025,7,2,16775.04],[2025,8,2,18094.92],[2025,9,2,17503.85],[2025,10,2,16873.96],[2025,11,2,16788.19],[2025,12,2,15388.84],[2015,1,3,15202.0],[2015,2,3,19066.0],[2015,3,3,18818.0],[2015,4,3,18764.0],[2015,5,3,17748.0],[2015,6,3,16770.0],[2015,7,3,16767.0],[2015,8,3,16991.0],[2015,9,3,16406.0],[2015,10,3,17372.0],[2015,11,3,17343.0],[2015,12,3,16824.0],[2016,1,3,12738.0],[2016,2,3,16049.0],[2016,3,3,17107.0],[2016,4,3,18153.0],[2016,5,3,16615.0],[2016,6,3,16257.0],[2016,7,3,16774.0],[2016,8,3,16976.0],[2016,9,3,16769.0],[2016,10,3,16416.0],[2016,11,3,16693.0],[2016,12,3,16434.0],[2017,1,3,12963.0],[2017,2,3,16072.0],[2017,3,3,17418.0],[2017,4,3,17716.0],[2017,5,3,15736.0],[2017,6,3,15826.0],[2017,7,3,15688.0],[2017,8,3,14900.0],[2017,9,3,16091.0],[2017,10,3,16032.0],[2017,11,3,15890.0],[2017,12,3,16665.0],[2018,1,3,11566.87],[2018,2,3,14956.65],[2018,3,3,16044.5],[2018,4,3,16256.51],[2018,5,3,15582.51],[2018,6,3,14094.93],[2018,7,3,13982.58],[2018,8,3,13689.22],[2018,9,3,14751.84],[2018,10,3,14783.43],[2018,11,3,15006.92],[2018,12,3,14766.19],[2019,1,3,11875.05],[2019,2,3,15781.29],[2019,3,3,14973.24],[2019,4,3,14887.48],[2019,5,3,14624.41],[2019,6,3,13675.87],[2019,7,3,12708.07],[2019,8,3,13608.89],[2019,9,3,13915.38],[2019,10,3,15148.48],[2019,11,3,15472.87],[2019,12,3,14072.19],[2020,1,3,10431.61],[2020,2,3,13483.52],[2020,3,3,12789.91],[2020,4,3,8744.66],[2020,5,3,7568.03],[2020,6,3,7245.2],[2020,7,3,8171.29],[2020,8,3,9882.47],[2020,9,3,11082.06],[2020,10,3,12525.53],[2020,11,3,11965.77],[2020,12,3,11897.42],[2021,1,3,13110.05],[2021,2,3,13685.42],[2021,3,3,13926.82],[2021,4,3,13757.01],[2021,5,3,12875.4],[2021,6,3,12915.14],[2021,7,3,13046.6],[2021,8,3,13341.64],[2021,9,3,13817.15],[2021,10,3,13816.73],[2021,11,3,13643.56],[2021,12,3,13694.0],[2022,1,3,11830.78],[2022,2,3,12777.83],[2022,3,3,13265.92],[2022,4,3,14310.04],[2022,5,3,13022.9],[2022,6,3,13273.77],[2022,7,3,13082.81],[2022,8,3,13471.34],[2022,9,3,13638.96],[2022,10,3,13109.26],[2022,11,3,13233.89],[2022,12,3,12815.19],[2023,1,3,10162.86],[2023,2,3,11669.58],[2023,3,3,12986.28],[2023,4,3,13606.18],[2023,5,3,11882.37],[2023,6,3,12535.69],[2023,7,3,11744.24],[2023,8,3,12043.53],[2023,9,3,12808.88],[2023,10,3,13042.35],[2023,11,3,13135.09],[2023,12,3,13790.8],[2024,1,3,8815.53],[2024,2,3,12798.01],[2024,3,3,13584.86],[2024,4,3,13944.69],[2024,5,3,14417.62],[2024,6,3,13767.92],[2024,7,3,12718.88],[2024,8,3,13440.46],[2024,9,3,12501.61],[2024,10,3,17572.43],[2024,11,3,18368.46],[2024,12,3,17708.01],[2025,1,3,13664.81],[2025,2,3,16710.39],[2025,3,3,18046.27],[2025,4,3,17556.51],[2025,5,3,16671.45],[2025,6,3,16864.32],[2025,7,3,15461.3],[2025,8,3,16761.77],[2025,9,3,16429.02],[2025,10,3,17297.46],[2025,11,3,17573.29],[2025,12,3,16531.87],[2015,1,4,12039.0],[2015,2,4,11383.0],[2015,3,4,11152.0],[2015,4,4,10710.0],[2015,5,4,9788.0],[2015,6,4,7898.0],[2015,7,4,7468.0],[2015,8,4,6936.0],[2015,9,4,6957.0],[2015,10,4,7354.0],[2015,11,4,6713.0],[2015,12,4,6461.0],[2016,1,4,6118.0],[2016,2,4,6952.0],[2016,3,4,6673.0],[2016,4,4,7271.0],[2016,5,4,6248.0],[2016,6,4,5946.0],[2016,7,4,5691.0],[2016,8,4,5465.0],[2016,9,4,5509.0],[2016,10,4,5351.0],[2016,11,4,5597.0],[2016,12,4,5722.0],[2017,1,4,5817.0],[2017,2,4,5481.0],[2017,3,4,5662.0],[2017,4,4,5501.0],[2017,5,4,5230.0],[2017,6,4,5068.0],[2017,7,4,5144.0],[2017,8,4,4884.0],[2017,9,4,5833.0],[2017,10,4,5760.0],[2017,11,4,5172.0],[2017,12,4,5494.0],[2018,1,4,5090.86],[2018,2,4,5419.09],[2018,3,4,5438.55],[2018,4,4,5799.35],[2018,5,4,5206.89],[2018,6,4,5037.21],[2018,7,4,4962.89],[2018,8,4,4026.3],[2018,9,4,4179.6],[2018,10,4,4283.9],[2018,11,4,4042.88],[2018,12,4,4110.89],[2019,1,4,8172.63],[2019,2,4,4267.01],[2019,3,4,4168.92],[2019,4,4,3945.31],[2019,5,4,4116.42],[2019,6,4,3805.54],[2019,7,4,3602.61],[2019,8,4,3504.43],[2019,9,4,3860.07],[2019,10,4,4022.63],[2019,11,4,4009.44],[2019,12,4,4086.82],[2020,1,4,3504.86],[2020,2,4,3782.04],[2020,3,4,3734.34],[2020,4,4,3229.56],[2020,5,4,2877.33],[2020,6,4,2885.78],[2020,7,4,3076.49],[2020,8,4,3189.95],[2020,9,4,3275.13],[2020,10,4,3481.73],[2020,11,4,3252.88],[2020,12,4,3385.18],[2021,1,4,3560.11],[2021,2,4,3640.22],[2021,3,4,3727.14],[2021,4,4,3635.76],[2021,5,4,3465.09],[2021,6,4,3487.35],[2021,7,4,3466.73],[2021,8,4,3468.34],[2021,9,4,3510.08],[2021,10,4,3520.76],[2021,11,4,3646.84],[2021,12,4,3825.19],[2022,1,4,3222.39],[2022,2,4,2945.25],[2022,3,4,2872.09],[2022,4,4,3032.67],[2022,5,4,2765.27],[2022,6,4,3003.68],[2022,7,4,2826.94],[2022,8,4,2895.52],[2022,9,4,2878.11],[2022,10,4,2853.65],[2022,11,4,3021.62],[2022,12,4,3049.05],[2023,1,4,2866.2],[2023,2,4,3034.44],[2023,3,4,3094.37],[2023,4,4,3225.9],[2023,5,4,2636.44],[2023,6,4,2735.73],[2023,7,4,2627.76],[2023,8,4,2644.14],[2023,9,4,2850.29],[2023,10,4,3166.54],[2023,11,4,3487.89],[2023,12,4,3497.36],[2024,1,4,3366.5],[2024,2,4,3553.19],[2024,3,4,3586.15],[2024,4,4,3547.4],[2024,5,4,3525.48],[2024,6,4,3276.84],[2024,7,4,3008.38],[2024,8,4,2991.34],[2024,9,4,3232.2],[2024,10,4,3403.15],[2024,11,4,3311.84],[2024,12,4,3165.5],[2025,1,4,3130.86],[2025,2,4,3381.06],[2025,3,4,3442.67],[2025,4,4,3282.1],[2025,5,4,3039.85],[2025,6,4,2796.6],[2025,7,4,2675.24],[2025,8,4,2829.37],[2025,9,4,2814.84],[2025,10,4,2914.34],[2025,11,4,2944.68],[2025,12,4,3001.27],[2016,6,5,1.0],[2016,9,5,3.0],[2016,10,5,3.0],[2016,11,5,4.0],[2016,12,5,6.0],[2017,1,5,7.0],[2017,2,5,7.0],[2017,3,5,11.0],[2017,4,5,9.0],[2017,5,5,7.0],[2017,6,5,6.0],[2017,7,5,5.0],[2017,8,5,6.0],[2017,9,5,9.0],[2017,10,5,8.0],[2017,11,5,7.0],[2017,12,5,9.0],[2018,1,5,6.28],[2018,2,5,5.99],[2018,3,5,5.41],[2018,4,5,6.27],[2018,5,5,6.26],[2018,6,5,5.59],[2018,7,5,3.01],[2018,8,5,3.17],[2018,9,5,4.71],[2018,10,5,5.36],[2018,11,5,5.75],[2018,12,5,6.18],[2019,1,5,6.11],[2019,2,5,7.29],[2019,3,5,5.3],[2019,4,5,5.19],[2019,5,5,5.64],[2019,6,5,3.69],[2019,7,5,3.82],[2019,8,5,3.74],[2019,9,5,4.62],[2019,10,5,5.6],[2019,11,5,5.9],[2019,12,5,5.43],[2020,1,5,2.01],[2020,2,5,1.12],[2020,3,5,3.13],[2020,4,5,1.8],[2020,5,5,1.8],[2020,6,5,1.2],[2020,7,5,1.1],[2020,8,5,1.1],[2020,9,5,1.1],[2020,10,5,1.1],[2020,11,5,1.16],[2020,12,5,2.54],[2021,1,5,5.68],[2021,2,5,5.79],[2021,3,5,4.61],[2021,4,5,4.11],[2021,5,5,3.86],[2021,6,5,3.92],[2021,7,5,4.84],[2021,8,5,5.52],[2021,9,5,7.89],[2021,10,5,10.64],[2021,11,5,10.45],[2021,12,5,12.22],[2022,1,5,10.44],[2022,2,5,9.56],[2022,3,5,12.5],[2022,4,5,13.82],[2022,5,5,10.74],[2022,6,5,8.11],[2022,7,5,7.2],[2022,8,5,10.57],[2022,9,5,8.32],[2022,10,5,9.93],[2022,11,5,11.94],[2022,12,5,11.03],[2023,1,5,10.7],[2023,2,5,11.01],[2023,3,5,11.32],[2023,4,5,11.99],[2023,5,5,10.79],[2023,6,5,8.88],[2023,7,5,13.3],[2023,8,5,8.54],[2023,9,5,11.22],[2023,10,5,14.77],[2023,11,5,15.63],[2023,12,5,16.12],[2024,1,5,13.85],[2024,2,5,12.47],[2024,3,5,13.4],[2024,4,5,15.26],[2024,5,5,13.86],[2024,6,5,13.19],[2024,7,5,11.6],[2024,8,5,8.75],[2024,9,5,11.12],[2024,10,5,13.12],[2024,11,5,26.22],[2024,12,5,24.72],[2025,1,5,20.85],[2025,2,5,25.58],[2025,3,5,25.46],[2025,4,5,24.6],[2025,5,5,28.11],[2025,6,5,26.27],[2025,7,5,24.21],[2025,8,5,24.26],[2025,9,5,28.21],[2025,10,5,29.47],[2025,11,5,25.75],[2025,12,5,23.4],[2015,1,6,9892.0],[2015,2,6,13863.0],[2015,3,6,7621.0],[2015,4,6,8727.0],[2015,5,6,5388.0],[2015,6,6,2373.0],[2015,7,6,1754.0],[2015,8,6,1619.0],[2015,9,6,1515.0],[2015,10,6,2066.0],[2015,11,6,1763.0],[2015,12,6,3369.0],[2016,1,6,4301.0],[2016,2,6,8073.0],[2016,3,6,8335.0],[2016,4,6,5809.0],[2016,5,6,2223.0],[2016,6,6,3045.0],[2016,7,6,3988.0],[2016,8,6,1321.0],[2016,9,6,1490.0],[2016,10,6,1456.0],[2016,11,6,1687.0],[2016,12,6,3485.0],[2017,1,6,7962.0],[2017,2,6,9693.0],[2017,3,6,8705.0],[2017,4,6,10254.0],[2017,5,6,6600.0],[2017,6,6,5239.0],[2017,7,6,1946.0],[2017,8,6,1174.0],[2017,9,6,1698.0],[2017,10,6,2097.0],[2017,11,6,4264.0],[2017,12,6,5878.0],[2018,1,6,8702.38],[2018,2,6,10667.08],[2018,3,6,8894.28],[2018,4,6,10474.51],[2018,5,6,6528.62],[2018,6,6,2821.66],[2018,7,6,1622.78],[2018,8,6,993.91],[2018,9,6,1973.54],[2018,10,6,2993.72],[2018,11,6,4547.96],[2018,12,6,3203.07],[2019,1,6,10969.03],[2019,2,6,11056.46],[2019,3,6,11468.13],[2019,4,6,11308.86],[2019,5,6,6892.11],[2019,6,6,2140.1],[2019,7,6,1752.68],[2019,8,6,1713.07],[2019,9,6,1869.84],[2019,10,6,2222.37],[2019,11,6,2222.09],[2019,12,6,6341.02],[2020,1,6,10566.38],[2020,2,6,11315.72],[2020,3,6,12588.9],[2020,4,6,14841.45],[2020,5,6,8264.98],[2020,6,6,3673.01],[2020,7,6,3728.14],[2020,8,6,3733.96],[2020,9,6,3158.78],[2020,10,6,3390.2],[2020,11,6,4339.06],[2020,12,6,6391.57],[2021,1,6,12649.92],[2021,2,6,11663.09],[2021,3,6,12373.97],[2021,4,6,12241.46],[2021,5,6,8275.68],[2021,6,6,2803.68],[2021,7,6,2277.56],[2021,8,6,1906.49],[2021,9,6,2085.93],[2021,10,6,3377.07],[2021,11,6,5977.04],[2021,12,6,10321.25],[2022,1,6,12570.08],[2022,2,6,12547.31],[2022,3,6,12382.69],[2022,4,6,14985.38],[2022,5,6,10531.33],[2022,6,6,5353.46],[2022,7,6,3879.57],[2022,8,6,2682.5],[2022,9,6,5201.31],[2022,10,6,6422.76],[2022,11,6,7680.89],[2022,12,6,10552.5],[2023,1,6,16179.7],[2023,2,6,14570.4],[2023,3,6,12612.04],[2023,4,6,13846.59],[2023,5,6,12422.44],[2023,6,6,3630.16],[2023,7,6,5174.81],[2023,8,6,2116.18],[2023,9,6,3634.57],[2023,10,6,3898.0],[2023,11,6,8177.18],[2023,12,6,6575.85],[2024,1,6,9712.97],[2024,2,6,17901.1],[2024,3,6,17140.08],[2024,4,6,16116.7],[2024,5,6,12175.0],[2024,6,6,4200.09],[2024,7,6,3121.5],[2024,8,6,4115.43],[2024,9,6,5026.48],[2024,10,6,7583.42],[2024,11,6,12653.68],[2024,12,6,14671.32],[2025,1,6,22918.82],[2025,2,6,25177.32],[2025,3,6,22666.26],[2025,4,6,23496.23],[2025,5,6,21090.07],[2025,6,6,10394.07],[2025,7,6,24998.72],[2025,8,6,15192.46],[2025,9,6,8703.68],[2025,10,6,8536.58],[2025,11,6,11603.37],[2025,12,6,19119.53],[2015,1,7,129.0],[2015,2,7,134.0],[2015,3,7,136.0],[2015,4,7,139.0],[2015,5,7,281.0],[2015,6,7,222.0],[2015,7,7,210.0],[2015,8,7,229.0],[2015,9,7,227.0],[2015,10,7,224.0],[2015,11,7,360.0],[2015,12,7,449.0],[2016,1,7,455.0],[2016,2,7,482.0],[2016,3,7,517.0],[2016,4,7,668.0],[2016,5,7,678.0],[2016,6,7,690.0],[2016,7,7,259.0],[2016,8,7,244.0],[2016,9,7,245.0],[2016,10,7,232.0],[2016,11,7,239.0],[2016,12,7,617.0],[2017,1,7,695.0],[2017,2,7,601.0],[2017,3,7,637.0],[2017,4,7,643.0],[2017,5,7,250.0],[2017,6,7,263.0],[2017,7,7,241.0],[2017,8,7,260.0],[2017,9,7,238.0],[2017,10,7,217.0],[2017,11,7,201.0],[2017,12,7,199.0],[2018,1,7,192.6],[2018,2,7,259.5],[2018,3,7,230.2],[2018,4,7,244.0],[2018,5,7,248.68],[2018,6,7,147.99],[2018,7,7,199.63],[2018,8,7,203.48],[2018,9,7,214.4],[2018,10,7,193.85],[2018,11,7,178.3],[2018,12,7,266.84],[2019,1,7,209.91],[2019,2,7,217.19],[2019,3,7,194.03],[2019,4,7,195.02],[2019,5,7,187.95],[2019,6,7,180.73],[2019,7,7,167.7],[2019,8,7,189.65],[2019,9,7,190.81],[2019,10,7,196.69],[2019,11,7,204.42],[2019,12,7,199.25],[2020,1,7,177.36],[2020,2,7,212.99],[2020,3,7,184.78],[2020,4,7,157.12],[2020,5,7,139.41],[2020,6,7,138.75],[2020,7,7,160.86],[2020,8,7,198.58],[2020,9,7,194.3],[2020,10,7,192.34],[2020,11,7,182.49],[2020,12,7,193.45],[2021,1,7,193.7],[2021,2,7,193.64],[2021,3,7,193.33],[2021,4,7,193.1],[2021,5,7,193.1],[2021,6,7,193.1],[2021,7,7,193.1],[2021,8,7,193.1],[2021,9,7,193.1],[2021,10,7,193.1],[2021,11,7,193.1],[2021,12,7,193.1],[2022,1,7,164.47],[2022,2,7,177.14],[2022,3,7,177.3],[2022,4,7,197.47],[2022,5,7,177.34],[2022,6,7,183.6],[2022,7,7,180.34],[2022,8,7,183.04],[2022,9,7,189.98],[2022,10,7,180.65],[2022,11,7,180.76],[2022,12,7,181.02],[2023,1,7,235.98],[2023,2,7,222.74],[2023,3,7,196.37],[2023,4,7,216.59],[2023,5,7,208.17],[2023,6,7,314.37],[2023,7,7,386.72],[2023,8,7,336.89],[2023,9,7,286.92],[2023,10,7,332.71],[2023,11,7,235.74],[2023,12,7,261.42],[2024,1,7,443.51],[2024,2,7,512.91],[2024,3,7,307.0],[2024,4,7,523.61],[2024,5,7,260.0],[2024,6,7,263.0],[2024,7,7,370.6],[2024,8,7,199.0],[2024,9,7,210.0],[2024,10,7,279.0],[2024,11,7,320.0],[2024,12,7,331.0],[2025,1,7,364.44],[2025,2,7,360.11],[2025,3,7,311.01],[2025,4,7,296.49],[2025,5,7,302.67],[2025,6,7,301.8],[2025,7,7,246.42],[2025,8,7,273.81],[2025,9,7,277.4],[2025,10,7,291.26],[2025,11,7,293.59],[2025,12,7,242.46],[2015,1,8,2087.0],[2015,2,8,2245.0],[2015,3,8,2118.0],[2015,4,8,2058.0],[2015,5,8,2193.0],[2015,6,8,2012.0],[2015,7,8,2436.0],[2015,8,8,2399.0],[2015,9,8,1742.0],[2015,10,8,1743.0],[2015,11,8,1489.0],[2015,12,8,1554.0],[2016,1,8,45.0],[2016,2,8,65.0],[2016,3,8,71.0],[2016,4,8,68.0],[2016,5,8,64.0],[2016,6,8,66.0],[2016,7,8,65.0],[2016,8,8,70.0],[2016,9,8,65.0],[2016,10,8,66.0],[2016,11,8,56.0],[2016,12,8,70.0],[2017,1,8,46.0],[2017,2,8,55.0],[2017,3,8,61.0],[2017,4,8,63.0],[2017,5,8,59.0],[2017,6,8,66.0],[2017,7,8,64.0],[2017,8,8,66.0],[2017,9,8,64.0],[2017,10,8,72.0],[2017,11,8,69.0],[2017,12,8,64.0],[2018,1,8,54.88],[2018,2,8,55.75],[2018,3,8,61.57],[2018,4,8,58.01],[2018,5,8,64.01],[2018,6,8,69.96],[2018,7,8,57.91],[2018,8,8,59.64],[2018,9,8,64.4],[2018,10,8,65.73],[2018,11,8,71.62],[2018,12,8,71.14],[2019,1,8,63.54],[2019,2,8,64.67],[2019,3,8,64.05],[2019,4,8,65.98],[2019,5,8,70.06],[2019,6,8,70.23],[2019,7,8,71.72],[2019,8,8,76.98],[2019,9,8,73.77],[2019,10,8,77.28],[2019,11,8,73.85],[2019,12,8,71.03],[2020,1,8,50.64],[2020,2,8,60.76],[2020,3,8,61.25],[2020,4,8,47.44],[2020,5,8,61.51],[2020,6,8,61.04],[2020,7,8,63.89],[2020,8,8,68.8],[2020,9,8,72.81],[2020,10,8,74.57],[2020,11,8,61.92],[2020,12,8,74.67],[2021,1,8,69.44],[2021,2,8,74.16],[2021,3,8,81.04],[2021,4,8,79.59],[2021,5,8,76.6],[2021,6,8,80.52],[2021,7,8,85.52],[2021,8,8,85.96],[2021,9,8,82.92],[2021,10,8,80.88],[2021,11,8,80.27],[2021,12,8,83.26],[2022,1,8,71.11],[2022,2,8,77.11],[2022,3,8,83.08],[2022,4,8,75.26],[2022,5,8,77.72],[2022,6,8,76.79],[2022,7,8,76.4],[2022,8,8,66.22],[2022,9,8,80.8],[2022,10,8,77.3],[2022,11,8,75.76],[2022,12,8,83.31],[2023,1,8,73.31],[2023,2,8,76.16],[2023,3,8,84.5],[2023,4,8,85.49],[2023,5,8,87.81],[2023,6,8,93.27],[2023,7,8,92.45],[2023,8,8,93.13],[2023,9,8,84.81],[2023,10,8,81.06],[2023,11,8,80.75],[2023,12,8,86.19],[2024,1,8,82.1],[2024,2,8,76.89],[2024,3,8,87.35],[2024,4,8,81.74],[2024,5,8,80.05],[2024,6,8,78.92],[2024,7,8,88.21],[2024,8,8,77.56],[2024,9,8,77.35],[2024,10,8,55.44],[2024,11,8,52.81],[2024,12,8,54.32],[2025,1,8,67.17],[2025,2,8,61.62],[2025,3,8,62.64],[2025,4,8,60.39],[2025,5,8,63.96],[2025,6,8,58.01],[2025,7,8,57.61],[2025,8,8,57.71],[2025,9,8,50.08],[2025,10,8,57.74],[2025,11,8,53.46],[2025,12,8,51.78],[2015,1,9,1589.0],[2015,2,9,1822.0],[2015,3,9,1746.0],[2015,4,9,1827.0],[2015,5,9,1491.0],[2015,6,9,1537.0],[2015,7,9,1532.0],[2015,8,9,1450.0],[2015,9,9,1462.0],[2015,10,9,1689.0],[2015,11,9,1708.0],[2015,12,9,1485.0],[2016,1,9,1210.0],[2016,2,9,1592.0],[2016,3,9,1489.0],[2016,4,9,1548.0],[2016,5,9,1590.0],[2016,6,9,1661.0],[2016,7,9,1627.0],[2016,8,9,1347.0],[2016,9,9,1530.0],[2016,10,9,1955.0],[2016,11,9,1641.0],[2016,12,9,1687.0],[2017,1,9,1754.0],[2017,2,9,1778.0],[2017,3,9,1087.0],[2017,4,9,1058.0],[2017,5,9,1214.0],[2017,6,9,1111.0],[2017,7,9,972.0],[2017,8,9,1110.0],[2017,9,9,961.0],[2017,10,9,1005.0],[2017,11,9,982.0],[2017,12,9,1024.0],[2018,1,9,1272.04],[2018,2,9,1602.54],[2018,3,9,1219.66],[2018,4,9,1353.54],[2018,5,9,1356.14],[2018,6,9,1230.28],[2018,7,9,1269.52],[2018,8,9,1132.22],[2018,9,9,999.94],[2018,10,9,940.34],[2018,11,9,1054.28],[2018,12,9,1118.23],[2019,1,9,783.28],[2019,2,9,1179.21],[2019,3,9,1132.32],[2019,4,9,863.23],[2019,5,9,1066.88],[2019,6,9,848.86],[2019,7,9,841.21],[2019,8,9,986.41],[2019,9,9,769.09],[2019,10,9,866.56],[2019,11,9,978.38],[2019,12,9,858.56],[2020,1,9,900.13],[2020,2,9,835.63],[2020,3,9,953.39],[2020,4,9,693.93],[2020,5,9,796.06],[2020,6,9,844.87],[2020,7,9,996.04],[2020,8,9,1036.38],[2020,9,9,1146.15],[2020,10,9,1054.06],[2020,11,9,1050.94],[2020,12,9,1072.05],[2021,1,9,1182.53],[2021,2,9,1403.5],[2021,3,9,1383.65],[2021,4,9,1471.07],[2021,5,9,1497.93],[2021,6,9,1649.85],[2021,7,9,1513.05],[2021,8,9,1353.17],[2021,9,9,1639.83],[2021,10,9,1824.68],[2021,11,9,1262.16],[2021,12,9,1326.58],[2022,1,9,1275.37],[2022,2,9,1038.88],[2022,3,9,1584.5],[2022,4,9,1560.72],[2022,5,9,1486.69],[2022,6,9,1555.68],[2022,7,9,1475.76],[2022,8,9,1599.42],[2022,9,9,1585.22],[2022,10,9,1967.61],[2022,11,9,1708.07],[2022,12,9,1866.7],[2023,1,9,1548.93],[2023,2,9,1901.5],[2023,3,9,1693.25],[2023,4,9,1941.13],[2023,5,9,1613.63],[2023,6,9,1854.26],[2023,7,9,1713.1],[2023,8,9,1955.87],[2023,9,9,1953.66],[2023,10,9,2002.53],[2023,11,9,2072.29],[2023,12,9,2055.72],[2024,1,9,1990.36],[2024,2,9,2087.51],[2024,3,9,2075.75],[2024,4,9,2067.28],[2024,5,9,1829.03],[2024,6,9,1982.65],[2024,7,9,1742.78],[2024,8,9,1892.39],[2024,9,9,2183.25],[2024,10,9,2103.32],[2024,11,9,2252.44],[2024,12,9,2145.17],[2025,1,9,1547.48],[2025,2,9,1568.98],[2025,3,9,1814.07],[2025,4,9,2041.07],[2025,5,9,2140.52],[2025,6,9,2081.82],[2025,7,9,1870.75],[2025,8,9,1626.61],[2025,9,9,1769.48],[2025,10,9,1820.76],[2025,11,9,1811.92],[2025,12,9,1685.17],[2015,1,10,24813.0],[2015,2,10,29315.0],[2015,3,10,29605.0],[2015,4,10,29477.0],[2015,5,10,29371.0],[2015,6,10,30139.0],[2015,7,10,30228.0],[2015,8,10,31641.0],[2015,9,10,29980.0],[2015,10,10,30573.0],[2015,11,10,30665.0],[2015,12,10,28854.0],[2016,1,10,21840.0],[2016,2,10,27457.0],[2016,3,10,27571.0],[2016,4,10,28251.0],[2016,5,10,27922.0],[2016,6,10,28330.0],[2016,7,10,30066.0],[2016,8,10,30410.0],[2016,9,10,30069.0],[2016,10,10,29036.0],[2016,11,10,29244.0],[2016,12,10,28836.0],[2017,1,10,24277.0],[2017,2,10,26034.0],[2017,3,10,30899.0],[2017,4,10,28260.0],[2017,5,10,27780.0],[2017,6,10,29434.0],[2017,7,10,29086.0],[2017,8,10,30071.0],[2017,9,10,31200.0],[2017,10,10,28071.0],[2017,11,10,28667.0],[2017,12,10,28833.0],[2018,1,10,24497.52],[2018,2,10,26578.47],[2018,3,10,27999.2],[2018,4,10,28441.15],[2018,5,10,28422.67],[2018,6,10,27628.4],[2018,7,10,29432.05],[2018,8,10,30278.89],[2018,9,10,31006.38],[2018,10,10,30091.39],[2018,11,10,30139.41],[2018,12,10,29007.13],[2019,1,10,26175.07],[2019,2,10,28511.49],[2019,3,10,28503.97],[2019,4,10,28798.22],[2019,5,10,30616.68],[2019,6,10,30178.35],[2019,7,10,31167.2],[2019,8,10,31980.8],[2019,9,10,30562.76],[2019,10,10,32291.36],[2019,11,10,31234.12],[2019,12,10,29221.15],[2020,1,10,25140.48],[2020,2,10,28122.81],[2020,3,10,28938.58],[2020,4,10,24874.1],[2020,5,10,25995.48],[2020,6,10,29284.07],[2020,7,10,32190.24],[2020,8,10,34105.36],[2020,9,10,34137.58],[2020,10,10,33194.99],[2020,11,10,32124.93],[2020,12,10,31732.18],[2021,1,10,30172.24],[2021,2,10,30255.62],[2021,3,10,32701.49],[2021,4,10,33018.15],[2021,5,10,33553.51],[2021,6,10,34402.36],[2021,7,10,35197.26],[2021,8,10,36365.85],[2021,9,10,35763.91],[2021,10,10,35995.23],[2021,11,10,35314.47],[2021,12,10,34396.22],[2022,1,10,31612.97],[2022,2,10,30665.21],[2022,3,10,32030.79],[2022,4,10,33987.51],[2022,5,10,34505.11],[2022,6,10,35818.27],[2022,7,10,35718.97],[2022,8,10,37656.76],[2022,9,10,37143.85],[2022,10,10,35000.1],[2022,11,10,33923.32],[2022,12,10,33658.99],[2023,1,10,30418.42],[2023,2,10,30112.34],[2023,3,10,32190.78],[2023,4,10,35095.68],[2023,5,10,33372.23],[2023,6,10,36385.19],[2023,7,10,35832.42],[2023,8,10,37254.2],[2023,9,10,38234.02],[2023,10,10,36340.36],[2023,11,10,35832.51],[2023,12,10,34323.89],[2024,1,10,31525.24],[2024,2,10,45771.9],[2024,3,10,33544.34],[2024,4,10,34462.92],[2024,5,10,37086.83],[2024,6,10,37237.01],[2024,7,10,36075.18],[2024,8,10,38422.64],[2024,9,10,38582.74],[2024,10,10,37252.2],[2024,11,10,37503.22],[2024,12,10,33252.98],[2025,1,10,30547.83],[2025,2,10,32679.59],[2025,3,10,32557.61],[2025,4,10,34097.12],[2025,5,10,34210.95],[2025,6,10,36237.64],[2025,7,10,34639.32],[2025,8,10,38485.13],[2025,9,10,37036.33],[2025,10,10,37961.41],[2025,11,10,37806.04],[2025,12,10,34181.66],[2015,1,11,5866.0],[2015,2,11,8488.0],[2015,3,11,8256.0],[2015,4,11,8594.0],[2015,5,11,7707.0],[2015,6,11,7449.0],[2015,7,11,7715.0],[2015,8,11,7711.0],[2015,9,11,7718.0],[2015,10,11,7824.0],[2015,11,11,7200.0],[2015,12,11,7869.0],[2016,1,11,7001.0],[2016,2,11,6625.0],[2016,3,11,5646.0],[2016,4,11,6095.0],[2016,5,11,7706.0],[2016,6,11,7785.0],[2016,7,11,8704.0],[2016,8,11,7960.0],[2016,9,11,8218.0],[2016,10,11,8483.0],[2016,11,11,9178.0],[2016,12,11,7517.0],[2017,1,11,7439.0],[2017,2,11,7076.0],[2017,3,11,2223.0],[2017,4,11,2590.0],[2017,5,11,1980.0],[2017,6,11,2389.0],[2017,7,11,2681.0],[2017,8,11,2472.0],[2017,9,11,2884.0],[2017,10,11,2492.0],[2017,11,11,2824.0],[2017,12,11,2886.0],[2018,1,11,2573.36],[2018,2,11,2178.34],[2018,3,11,2235.95],[2018,4,11,2385.4],[2018,5,11,2136.82],[2018,6,11,1940.9],[2018,7,11,2310.14],[2018,8,11,2435.92],[2018,9,11,2988.8],[2018,10,11,2381.36],[2018,11,11,2538.91],[2018,12,11,2453.1],[2019,1,11,2227.98],[2019,2,11,2244.64],[2019,3,11,2095.83],[2019,4,11,2181.75],[2019,5,11,2154.78],[2019,6,11,2101.87],[2019,7,11,2479.37],[2019,8,11,2330.6],[2019,9,11,2520.04],[2019,10,11,2354.36],[2019,11,11,2418.7],[2019,12,11,2584.9],[2020,1,11,2418.14],[2020,2,11,2289.41],[2020,3,11,2558.54],[2020,4,11,2585.17],[2020,5,11,2088.29],[2020,6,11,2149.05],[2020,7,11,2365.7],[2020,8,11,2687.86],[2020,9,11,2701.05],[2020,10,11,2592.24],[2020,11,11,2867.03],[2020,12,11,2640.12],[2021,1,11,2398.83],[2021,2,11,2762.8],[2021,3,11,2525.41],[2021,4,11,2669.97],[2021,5,11,2729.33],[2021,6,11,2788.16],[2021,7,11,2984.21],[2021,8,11,3042.05],[2021,9,11,3256.84],[2021,10,11,3311.71],[2021,11,11,3450.84],[2021,12,11,3284.93],[2022,1,11,2958.53],[2022,2,11,2917.12],[2022,3,11,3312.74],[2022,4,11,3315.48],[2022,5,11,3398.97],[2022,6,11,4037.82],[2022,7,11,2684.14],[2022,8,11,3959.44],[2022,9,11,3635.2],[2022,10,11,3189.28],[2022,11,11,3245.65],[2022,12,11,3337.89],[2023,1,11,3254.4],[2023,2,11,3246.8],[2023,3,11,3165.57],[2023,4,11,3868.24],[2023,5,11,3339.42],[2023,6,11,3540.1],[2023,7,11,3041.05],[2023,8,11,3195.67],[2023,9,11,2765.3],[2023,10,11,3265.83],[2023,11,11,2901.94],[2023,12,11,3127.98],[2024,1,11,2375.65],[2024,2,11,3058.89],[2024,3,11,2825.61],[2024,4,11,3130.31],[2024,5,11,3204.75],[2024,6,11,3053.91],[2024,7,11,3252.5],[2024,8,11,3241.95],[2024,9,11,3396.94],[2024,10,11,50.14],[2024,11,11,51.44],[2024,12,11,50.92],[2025,1,11,11.32],[2025,2,11,12.63],[2025,3,11,18.09],[2025,4,11,13.52],[2025,5,11,14.76],[2025,6,11,15.11],[2025,7,11,14.05],[2025,8,11,12.41],[2025,9,11,12.89],[2025,10,11,12.12],[2025,11,11,12.26],[2025,12,11,12.82],[2015,1,12,67556.0],[2015,2,12,71024.0],[2015,3,12,65654.0],[2015,4,12,63653.0],[2015,5,12,53506.0],[2015,6,12,47910.0],[2015,7,12,47035.0],[2015,8,12,51711.0],[2015,9,12,54026.0],[2015,10,12,61054.0],[2015,11,12,70440.0],[2015,12,12,69129.0],[2016,1,12,73669.0],[2016,2,12,70085.0],[2016,3,12,67198.0],[2016,4,12,62519.0],[2016,5,12,55888.0],[2016,6,12,45401.0],[2016,7,12,53007.0],[2016,8,12,52421.0],[2016,9,12,55051.0],[2016,10,12,57576.0],[2016,11,12,62536.0],[2016,12,12,63539.0],[2017,1,12,67056.0],[2017,2,12,67334.0],[2017,3,12,63610.0],[2017,4,12,64103.0],[2017,5,12,55710.0],[2017,6,12,56761.0],[2017,7,12,53593.0],[2017,8,12,51266.0],[2017,9,12,57515.0],[2017,10,12,58230.0],[2017,11,12,63689.0],[2017,12,12,75119.0],[2018,1,12,66569.2],[2018,2,12,62949.16],[2018,3,12,60077.77],[2018,4,12,65582.43],[2018,5,12,53244.28],[2018,6,12,52670.36],[2018,7,12,52579.39],[2018,8,12,55409.56],[2018,9,12,59036.91],[2018,10,12,60699.56],[2018,11,12,67417.43],[2018,12,12,75895.63],[2019,1,12,78246.78],[2019,2,12,74582.04],[2019,3,12,66056.5],[2019,4,12,66693.13],[2019,5,12,66940.06],[2019,6,12,63545.92],[2019,7,12,58608.65],[2019,8,12,60212.28],[2019,9,12,60368.44],[2019,10,12,67273.06],[2019,11,12,70041.8],[2019,12,12,80575.9],[2020,1,12,75787.85],[2020,2,12,69343.36],[2020,3,12,68390.9],[2020,4,12,58360.89],[2020,5,12,44116.83],[2020,6,12,57337.09],[2020,7,12,58960.57],[2020,8,12,61345.7],[2020,9,12,64491.93],[2020,10,12,69238.17],[2020,11,12,70553.43],[2020,12,12,67459.9],[2021,1,12,72946.3],[2021,2,12,70110.26],[2021,3,12,65852.87],[2021,4,12,66802.92],[2021,5,12,61653.92],[2021,6,12,56579.11],[2021,7,12,52239.46],[2021,8,12,51684.75],[2021,9,12,59517.11],[2021,10,12,65618.39],[2021,11,12,70058.51],[2021,12,12,73647.11],[2022,1,12,75713.18],[2022,2,12,67978.97],[2022,3,12,67781.77],[2022,4,12,73408.73],[2022,5,12,70322.47],[2022,6,12,63546.07],[2022,7,12,61067.51],[2022,8,12,64534.27],[2022,9,12,66925.14],[2022,10,12,69747.23],[2022,11,12,71230.89],[2022,12,12,73993.26],[2023,1,12,79002.12],[2023,2,12,71618.47],[2023,3,12,70118.27],[2023,4,12,74660.09],[2023,5,12,66139.44],[2023,6,12,61632.92],[2023,7,12,61836.94],[2023,8,12,63905.64],[2023,9,12,68920.8],[2023,10,12,72981.36],[2023,11,12,77543.77],[2023,12,12,78947.13],[2024,1,12,83345.86],[2024,2,12,82342.39],[2024,3,12,79720.81],[2024,4,12,80682.99],[2024,5,12,72716.45],[2024,6,12,70046.32],[2024,7,12,69280.94],[2024,8,12,72059.78],[2024,9,12,74285.08],[2024,10,12,74486.48],[2024,11,12,76738.44],[2024,12,12,74125.95],[2025,1,12,76621.74],[2025,2,12,72051.91],[2025,3,12,72407.8],[2025,4,12,75229.99],[2025,5,12,69540.6],[2025,6,12,67033.04],[2025,7,12,60523.58],[2025,8,12,62142.84],[2025,9,12,68605.2],[2025,10,12,73847.94],[2025,11,12,74237.06],[2025,12,12,74591.61],[2015,1,13,261535.0],[2015,2,13,277922.0],[2015,3,13,265611.0],[2015,4,13,281130.0],[2015,5,13,262330.0],[2015,6,13,268874.0],[2015,7,13,270886.0],[2015,8,13,285530.0],[2015,9,13,271967.0],[2015,10,13,276713.0],[2015,11,13,284666.0],[2015,12,13,280535.0],[2016,1,13,279315.0],[2016,2,13,287234.0],[2016,3,13,296568.0],[2016,4,13,282140.0],[2016,5,13,288746.0],[2016,6,13,286827.0],[2016,7,13,287244.0],[2016,8,13,284913.0],[2016,9,13,292164.0],[2016,10,13,287528.0],[2016,11,13,302783.0],[2016,12,13,295607.0],[2017,1,13,281134.0],[2017,2,13,287541.0],[2017,3,13,271677.0],[2017,4,13,299092.0],[2017,5,13,279511.0],[2017,6,13,288121.0],[2017,7,13,289687.0],[2017,8,13,295852.0],[2017,9,13,298368.0],[2017,10,13,290465.0],[2017,11,13,302054.0],[2017,12,13,295096.0],[2018,1,13,300408.07],[2018,2,13,292561.89],[2018,3,13,308225.23],[2018,4,13,306420.17],[2018,5,13,294014.46],[2018,6,13,305052.22],[2018,7,13,316488.94],[2018,8,13,304010.56],[2018,9,13,299285.46],[2018,10,13,302233.19],[2018,11,13,299307.61],[2018,12,13,296987.59],[2019,1,13,291881.67],[2019,2,13,283069.0],[2019,3,13,291012.1],[2019,4,13,291718.44],[2019,5,13,299355.17],[2019,6,13,287577.88],[2019,7,13,292170.31],[2019,8,13,299631.62],[2019,9,13,298803.24],[2019,10,13,306151.67],[2019,11,13,302190.64],[2019,12,13,297393.43],[2020,1,13,294575.1],[2020,2,13,291798.42],[2020,3,13,312937.02],[2020,4,13,312414.57],[2020,5,13,283609.18],[2020,6,13,267681.64],[2020,7,13,279715.88],[2020,8,13,301204.54],[2020,9,13,306516.41],[2020,10,13,298692.85],[2020,11,13,305295.89],[2020,12,13,313709.27],[2021,1,13,310272.87],[2021,2,13,304226.09],[2021,3,13,323063.74],[2021,4,13,312810.66],[2021,5,13,318306.62],[2021,6,13,304273.11],[2021,7,13,297531.67],[2021,8,13,305813.5],[2021,9,13,303835.87],[2021,10,13,302988.0],[2021,11,13,313532.55],[2021,12,13,318963.72],[2022,1,13,317090.26],[2022,2,13,297593.27],[2022,3,13,310484.07],[2022,4,13,323960.6],[2022,5,13,326520.86],[2022,6,13,325899.6],[2022,7,13,329888.69],[2022,8,13,340642.76],[2022,9,13,338434.54],[2022,10,13,332019.87],[2022,11,13,323120.68],[2022,12,13,318936.24],[2023,1,13,317299.2],[2023,2,13,311920.88],[2023,3,13,296838.59],[2023,4,13,322636.7],[2023,5,13,309333.94],[2023,6,13,313489.52],[2023,7,13,317215.83],[2023,8,13,321257.09],[2023,9,13,323532.62],[2023,10,13,320505.1],[2023,11,13,329687.61],[2023,12,13,334852.49],[2024,1,13,330158.46],[2024,2,13,327269.13],[2024,3,13,318908.22],[2024,4,13,328725.84],[2024,5,13,333627.82],[2024,6,13,337230.13],[2024,7,13,329275.21],[2024,8,13,323287.5],[2024,9,13,331852.2],[2024,10,13,339853.27],[2024,11,13,347977.19],[2024,12,13,332941.83],[2025,1,13,329122.2],[2025,2,13,323358.0],[2025,3,13,312832.94],[2025,4,13,334787.09],[2025,5,13,326230.72],[2025,6,13,332297.6],[2025,7,13,326753.31],[2025,8,13,337730.44],[2025,9,13,335646.54],[2025,10,13,339928.1],[2025,11,13,337734.18],[2025,12,13,333744.3],[2015,1,14,66323.0],[2015,2,14,64459.0],[2015,3,14,59154.0],[2015,4,14,65987.0],[2015,5,14,68302.52],[2015,6,14,66847.0],[2015,7,14,58372.0],[2015,8,14,59764.0],[2015,9,14,59147.0],[2015,10,14,61665.6],[2015,11,14,62347.0],[2015,12,14,53999.0],[2016,1,14,67579.0],[2016,2,14,71784.0],[2016,3,14,74583.0],[2016,4,14,69203.0],[2016,5,14,68107.0],[2016,6,14,63000.0],[2016,7,14,72704.0],[2016,8,14,67253.0],[2016,9,14,70023.0],[2016,10,14,73981.0],[2016,11,14,72503.0],[2016,12,14,75169.0],[2017,1,14,76199.0],[2017,2,14,84993.0],[2017,3,14,75107.0],[2017,4,14,78763.0],[2017,5,14,71514.0],[2017,6,14,73744.24],[2017,7,14,73533.0],[2017,8,14,79622.76],[2017,9,14,75104.0],[2017,10,14,62884.0],[2017,11,14,67707.0],[2017,12,14,57473.0],[2018,1,14,56197.53],[2018,2,14,58211.6],[2018,3,14,55140.61],[2018,4,14,58086.54],[2018,5,14,61531.09],[2018,6,14,58853.43],[2018,7,14,57477.4],[2018,8,14,62582.57],[2018,9,14,67332.59],[2018,10,14,67797.48],[2018,11,14,76614.94],[2018,12,14,68132.72],[2019,1,14,64710.24],[2019,2,14,62180.22],[2019,3,14,60472.98],[2019,4,14,66982.2],[2019,5,14,61720.02],[2019,6,14,60753.7],[2019,7,14,57181.14],[2019,8,14,53241.02],[2019,9,14,53706.64],[2019,10,14,42751.76],[2019,11,14,55744.94],[2019,12,14,53408.61],[2020,1,14,60129.21],[2020,2,14,60423.98],[2020,3,14,62832.56],[2020,4,14,51359.03],[2020,5,14,44115.07],[2020,6,14,44544.89],[2020,7,14,48535.17],[2020,8,14,60176.66],[2020,9,14,58290.33],[2020,10,14,50619.84],[2020,11,14,63424.94],[2020,12,14,62888.92],[2021,1,14,58380.06],[2021,2,14,54510.18],[2021,3,14,56772.75],[2021,4,14,48058.08],[2021,5,14,44693.79],[2021,6,14,50437.03],[2021,7,14,63347.19],[2021,8,14,66192.54],[2021,9,14,79539.95],[2021,10,14,61706.41],[2021,11,14,60297.0],[2021,12,14,55677.9],[2022,1,14,71645.76],[2022,2,14,84977.3],[2022,3,14,69618.48],[2022,4,14,74351.5],[2022,5,14,75761.28],[2022,6,14,57935.16],[2022,7,14,60734.12],[2022,8,14,66354.21],[2022,9,14,58698.02],[2022,10,14,67639.73],[2022,11,14,58409.74],[2022,12,14,69086.71],[2023,1,14,55896.6],[2023,2,14,49293.26],[2023,3,14,64202.44],[2023,4,14,46751.92],[2023,5,14,59431.61],[2023,6,14,58059.91],[2023,7,14,61580.09],[2023,8,14,72110.21],[2023,9,14,70896.72],[2023,10,14,59854.2],[2023,11,14,71427.03],[2023,12,14,54001.67],[2024,1,14,73648.6],[2024,2,14,71093.33],[2024,3,14,73052.2],[2024,4,14,76004.25],[2024,5,14,80710.47],[2024,6,14,83242.6],[2024,7,14,77718.23],[2024,8,14,84326.71],[2024,9,14,84253.12],[2024,10,14,57905.52],[2024,11,14,63554.52],[2024,12,14,66824.9],[2025,1,14,82357.22],[2025,2,14,86686.87],[2025,3,14,79713.75],[2025,4,14,86849.8],[2025,5,14,87265.07],[2025,6,14,81941.79],[2025,7,14,81326.04],[2025,8,14,77233.18],[2025,9,14,80308.75],[2025,10,14,66872.52],[2025,11,14,62846.59],[2025,12,14,72124.96],[2015,1,15,25990.0],[2015,2,15,30278.0],[2015,3,15,30626.0],[2015,4,15,29916.0],[2015,5,15,27616.0],[2015,6,15,25626.0],[2015,7,15,24859.0],[2015,8,15,26428.0],[2015,9,15,25745.0],[2015,10,15,28447.0],[2015,11,15,27679.0],[2015,12,15,26520.0],[2016,1,15,21451.0],[2016,2,15,23198.0],[2016,3,15,25008.0],[2016,4,15,24414.0],[2016,5,15,22546.0],[2016,6,15,21269.0],[2016,7,15,20816.0],[2016,8,15,21235.0],[2016,9,15,22091.0],[2016,10,15,19386.0],[2016,11,15,20669.0],[2016,12,15,22478.0],[2017,1,15,20258.0],[2017,2,15,22440.0],[2017,3,15,24327.0],[2017,4,15,23591.0],[2017,5,15,21972.0],[2017,6,15,22130.0],[2017,7,15,20887.0],[2017,8,15,20981.0],[2017,9,15,22706.0],[2017,10,15,22572.0],[2017,11,15,22875.0],[2017,12,15,23744.0],[2018,1,15,21766.31],[2018,2,15,24447.73],[2018,3,15,25035.67],[2018,4,15,25446.88],[2018,5,15,23831.09],[2018,6,15,22856.31],[2018,7,15,22631.76],[2018,8,15,22528.35],[2018,9,15,22786.99],[2018,10,15,23461.96],[2018,11,15,23286.46],[2018,12,15,22706.59],[2019,1,15,20927.29],[2019,2,15,23261.2],[2019,3,15,23051.47],[2019,4,15,23112.76],[2019,5,15,22729.68],[2019,6,15,20845.11],[2019,7,15,20060.74],[2019,8,15,19677.22],[2019,9,15,20752.68],[2019,10,15,22108.72],[2019,11,15,22780.5],[2019,12,15,20802.99],[2020,1,15,18916.32],[2020,2,15,21778.72],[2020,3,15,20794.09],[2020,4,15,18745.1],[2020,5,15,16000.65],[2020,6,15,16563.64],[2020,7,15,18289.32],[2020,8,15,19627.16],[2020,9,15,20533.19],[2020,10,15,20427.19],[2020,11,15,20797.92],[2020,12,15,20150.45],[2021,1,15,21611.59],[2021,2,15,22252.7],[2021,3,15,22348.83],[2021,4,15,22945.82],[2021,5,15,21031.03],[2021,6,15,20256.72],[2021,7,15,19644.52],[2021,8,15,20260.46],[2021,9,15,20754.86],[2021,10,15,21231.36],[2021,11,15,21067.15],[2021,12,15,21561.3],[2022,1,15,19716.81],[2022,2,15,20572.49],[2022,3,15,21038.28],[2022,4,15,21393.42],[2022,5,15,19324.94],[2022,6,15,18913.13],[2022,7,15,18255.31],[2022,8,15,18391.25],[2022,9,15,18765.09],[2022,10,15,18382.34],[2022,11,15,19397.66],[2022,12,15,18725.31],[2023,1,15,17054.81],[2023,2,15,18959.76],[2023,3,15,18304.56],[2023,4,15,20549.86],[2023,5,15,17218.62],[2023,6,15,17916.59],[2023,7,15,15718.83],[2023,8,15,17153.51],[2023,9,15,18299.18],[2023,10,15,18435.56],[2023,11,15,19424.63],[2023,12,15,19371.58],[2024,1,15,19614.61],[2024,2,15,21457.13],[2024,3,15,21393.84],[2024,4,15,22401.85],[2024,5,15,21727.54],[2024,6,15,20191.82],[2024,7,15,18983.35],[2024,8,15,17999.62],[2024,9,15,21924.68],[2024,10,15,21342.46],[2024,11,15,21383.8],[2024,12,15,22800.8],[2025,1,15,19947.41],[2025,2,15,23112.98],[2025,3,15,23000.04],[2025,4,15,23152.05],[2025,5,15,21848.65],[2025,6,15,21264.81],[2025,7,15,19201.86],[2025,8,15,19938.78],[2025,9,15,20052.8],[2025,10,15,20989.02],[2025,11,15,21183.63],[2025,12,15,20486.61],[2015,1,16,77045.0],[2015,2,16,99806.0],[2015,3,16,97150.0],[2015,4,16,95384.0],[2015,5,16,86661.0],[2015,6,16,86196.0],[2015,7,16,85308.0],[2015,8,16,86933.0],[2015,9,16,83682.0],[2015,10,16,86275.0],[2015,11,16,86745.0],[2015,12,16,81434.0],[2016,1,16,65212.0],[2016,2,16,80965.0],[2016,3,16,84458.0],[2016,4,16,83661.0],[2016,5,16,79537.0],[2016,6,16,80248.0],[2016,7,16,83029.0],[2016,8,16,82116.0],[2016,9,16,84369.0],[2016,10,16,81902.0],[2016,11,16,82590.0],[2016,12,16,84672.0],[2017,1,16,73174.0],[2017,2,16,84522.0],[2017,3,16,84096.0],[2017,4,16,85816.0],[2017,5,16,82622.0],[2017,6,16,88737.0],[2017,7,16,85653.0],[2017,8,16,88910.0],[2017,9,16,90840.0],[2017,10,16,88189.0],[2017,11,16,88541.0],[2017,12,16,89883.0],[2018,1,16,75003.63],[2018,2,16,88239.01],[2018,3,16,91767.97],[2018,4,16,93375.62],[2018,5,16,89560.83],[2018,6,16,86243.96],[2018,7,16,87052.3],[2018,8,16,90483.5],[2018,9,16,93711.46],[2018,10,16,91457.65],[2018,11,16,93312.52],[2018,12,16,86643.48],[2019,1,16,75552.32],[2019,2,16,90067.66],[2019,3,16,92654.1],[2019,4,16,91025.81],[2019,5,16,91865.57],[2019,6,16,88655.47],[2019,7,16,82773.02],[2019,8,16,88660.83],[2019,9,16,90829.9],[2019,10,16,92080.37],[2019,11,16,96589.77],[2019,12,16,86310.01],[2020,1,16,71140.17],[2020,2,16,87038.05],[2020,3,16,87889.88],[2020,4,16,74561.05],[2020,5,16,68466.2],[2020,6,16,71097.93],[2020,7,16,76426.5],[2020,8,16,86198.4],[2020,9,16,90938.43],[2020,10,16,95596.2],[2020,11,16,98551.81],[2020,12,16,91181.86],[2021,1,16,95752.45],[2021,2,16,101620.13],[2021,3,16,105104.88],[2021,4,16,111212.72],[2021,5,16,103870.96],[2021,6,16,104892.43],[2021,7,16,103598.04],[2021,8,16,103977.54],[2021,9,16,106528.38],[2021,10,16,106439.96],[2021,11,16,105104.19],[2021,12,16,102231.21],[2022,1,16,93718.83],[2022,2,16,101251.9],[2022,3,16,105498.14],[2022,4,16,112549.91],[2022,5,16,102617.92],[2022,6,16,106523.31],[2022,7,16,101742.15],[2022,8,16,106030.19],[2022,9,16,107019.24],[2022,10,16,104080.86],[2022,11,16,103482.22],[2022,12,16,97054.07],[2023,1,16,85942.35],[2023,2,16,99436.65],[2023,3,16,97044.19],[2023,4,16,108194.74],[2023,5,16,93137.24],[2023,6,16,103489.2],[2023,7,16,98207.2],[2023,8,16,100960.26],[2023,9,16,106228.95],[2023,10,16,102676.96],[2023,11,16,105139.32],[2023,12,16,102674.57],[2024,1,16,86768.81],[2024,2,16,98328.99],[2024,3,16,105488.34],[2024,4,16,106771.2],[2024,5,16,107477.73],[2024,6,16,105778.11],[2024,7,16,99599.61],[2024,8,16,107547.32],[2024,9,16,107550.41],[2024,10,16,106401.54],[2024,11,16,123483.33],[2024,12,16,111736.31],[2025,1,16,94225.36],[2025,2,16,113773.07],[2025,3,16,117597.29],[2025,4,16,121787.94],[2025,5,16,114159.75],[2025,6,16,116522.62],[2025,7,16,108167.9],[2025,8,16,116956.53],[2025,9,16,113355.99],[2025,10,16,115660.89],[2025,11,16,118955.1],[2025,12,16,104634.86],[2015,1,17,80266.0],[2015,2,17,94564.0],[2015,3,17,91103.0],[2015,4,17,96493.0],[2015,5,17,89742.0],[2015,6,17,89427.0],[2015,7,17,84192.0],[2015,8,17,85775.0],[2015,9,17,84903.0],[2015,10,17,84561.0],[2015,11,17,85930.0],[2015,12,17,85525.0],[2016,1,17,65257.0],[2016,2,17,80215.0],[2016,3,17,83086.0],[2016,4,17,85746.0],[2016,5,17,83278.0],[2016,6,17,83143.0],[2016,7,17,83879.0],[2016,8,17,81615.0],[2016,9,17,85506.0],[2016,10,17,83224.0],[2016,11,17,84143.0],[2016,12,17,82289.0],[2017,1,17,67483.0],[2017,2,17,79952.0],[2017,3,17,81111.0],[2017,4,17,86978.0],[2017,5,17,80291.0],[2017,6,17,86151.0],[2017,7,17,80684.0],[2017,8,17,83845.0],[2017,9,17,87139.0],[2017,10,17,82167.0],[2017,11,17,82999.0],[2017,12,17,81849.0],[2018,1,17,69771.97],[2018,2,17,80195.56],[2018,3,17,79713.48],[2018,4,17,81254.78],[2018,5,17,78330.63],[2018,6,17,73996.26],[2018,7,17,74589.86],[2018,8,17,79883.71],[2018,9,17,80324.86],[2018,10,17,78085.18],[2018,11,17,83737.8],[2018,12,17,72300.48],[2019,1,17,66351.31],[2019,2,17,75774.59],[2019,3,17,74653.36],[2019,4,17,72386.76],[2019,5,17,74303.62],[2019,6,17,72798.86],[2019,7,17,69755.46],[2019,8,17,74088.38],[2019,9,17,73993.38],[2019,10,17,76589.56],[2019,11,17,78419.88],[2019,12,17,71298.6],[2020,1,17,65624.77],[2020,2,17,74296.59],[2020,3,17,75059.88],[2020,4,17,59376.41],[2020,5,17,53511.42],[2020,6,17,58603.52],[2020,7,17,63294.07],[2020,8,17,69293.25],[2020,9,17,72667.54],[2020,10,17,76865.16],[2020,11,17,72844.16],[2020,12,17,69242.8],[2021,1,17,69444.22],[2021,2,17,71019.99],[2021,3,17,75495.62],[2021,4,17,76415.01],[2021,5,17,73105.18],[2021,6,17,71617.74],[2021,7,17,70151.92],[2021,8,17,71264.38],[2021,9,17,71893.07],[2021,10,17,71589.54],[2021,11,17,70403.61],[2021,12,17,67869.47],[2022,1,17,62277.67],[2022,2,17,65184.66],[2022,3,17,63587.89],[2022,4,17,68461.37],[2022,5,17,64394.86],[2022,6,17,65419.33],[2022,7,17,64719.41],[2022,8,17,66624.39],[2022,9,17,67212.02],[2022,10,17,66019.46],[2022,11,17,66325.15],[2022,12,17,62696.65],[2023,1,17,56496.36],[2023,2,17,61502.03],[2023,3,17,61089.43],[2023,4,17,66740.55],[2023,5,17,59677.94],[2023,6,17,61396.31],[2023,7,17,60523.77],[2023,8,17,62903.62],[2023,9,17,63816.75],[2023,10,17,62479.39],[2023,11,17,63676.8],[2023,12,17,61207.93],[2024,1,17,55111.78],[2024,2,17,59343.11],[2024,3,17,63554.05],[2024,4,17,67083.55],[2024,5,17,71385.03],[2024,6,17,67892.09],[2024,7,17,65677.33],[2024,8,17,68245.02],[2024,9,17,69354.67],[2024,10,17,73052.03],[2024,11,17,82081.74],[2024,12,17,76042.6],[2025,1,17,65865.51],[2025,2,17,77185.72],[2025,3,17,77306.55],[2025,4,17,80213.63],[2025,5,17,76284.1],[2025,6,17,78516.26],[2025,7,17,74182.94],[2025,8,17,78049.86],[2025,9,17,76025.99],[2025,10,17,77153.32],[2025,11,17,78182.26],[2025,12,17,71868.24],[2015,1,18,19245.0],[2015,2,18,24626.0],[2015,3,18,23789.0],[2015,4,18,23969.0],[2015,5,18,22958.0],[2015,6,18,22320.0],[2015,7,18,21766.0],[2015,8,18,22040.0],[2015,9,18,20586.0],[2015,10,18,22479.0],[2015,11,18,22464.0],[2015,12,18,22850.0],[2016,1,18,16278.0],[2016,2,18,20380.0],[2016,3,18,21215.0],[2016,4,18,21198.0],[2016,5,18,20127.0],[2016,6,18,20363.0],[2016,7,18,20408.0],[2016,8,18,20239.0],[2016,9,18,20665.0],[2016,10,18,21062.0],[2016,11,18,21236.0],[2016,12,18,21463.0],[2017,1,18,17360.0],[2017,2,18,21096.0],[2017,3,18,20462.0],[2017,4,18,21530.0],[2017,5,18,20373.0],[2017,6,18,21926.0],[2017,7,18,21259.0],[2017,8,18,21609.0],[2017,9,18,22836.0],[2017,10,18,22404.0],[2017,11,18,22477.0],[2017,12,18,22929.0],[2018,1,18,18505.03],[2018,2,18,22075.85],[2018,3,18,22129.52],[2018,4,18,22221.27],[2018,5,18,21700.41],[2018,6,18,20095.62],[2018,7,18,19934.77],[2018,8,18,21937.68],[2018,9,18,23288.48],[2018,10,18,22356.37],[2018,11,18,20391.14],[2018,12,18,22332.57],[2019,1,18,17832.57],[2019,2,18,21656.02],[2019,3,18,21378.9],[2019,4,18,21365.73],[2019,5,18,21127.62],[2019,6,18,21531.62],[2019,7,18,20201.27],[2019,8,18,21968.96],[2019,9,18,21593.3],[2019,10,18,22860.56],[2019,11,18,23559.64],[2019,12,18,21189.06],[2020,1,18,17092.9],[2020,2,18,20714.56],[2020,3,18,19795.81],[2020,4,18,12288.64],[2020,5,18,11654.54],[2020,6,18,15048.32],[2020,7,18,18600.44],[2020,8,18,21496.7],[2020,9,18,22018.52],[2020,10,18,22455.96],[2020,11,18,22281.69],[2020,12,18,24773.09],[2021,1,18,21574.62],[2021,2,18,22666.75],[2021,3,18,22947.01],[2021,4,18,22264.86],[2021,5,18,20611.74],[2021,6,18,21712.12],[2021,7,18,21626.98],[2021,8,18,22224.6],[2021,9,18,23035.3],[2021,10,18,22633.15],[2021,11,18,22424.78],[2021,12,18,22358.65],[2022,1,18,19112.27],[2022,2,18,19766.87],[2022,3,18,20122.48],[2022,4,18,22339.94],[2022,5,18,20022.53],[2022,6,18,21928.69],[2022,7,18,21601.41],[2022,8,18,22228.03],[2022,9,18,22973.81],[2022,10,18,21738.86],[2022,11,18,22053.04],[2022,12,18,21579.92],[2023,1,18,17777.36],[2023,2,18,18955.73],[2023,3,18,20204.25],[2023,4,18,21498.56],[2023,5,18,17850.99],[2023,6,18,20908.04],[2023,7,18,19812.46],[2023,8,18,19512.81],[2023,9,18,22041.11],[2023,10,18,21021.25],[2023,11,18,22147.77],[2023,12,18,21598.78],[2024,1,18,18507.33],[2024,2,18,20676.12],[2024,3,18,21332.82],[2024,4,18,21308.34],[2024,5,18,22273.31],[2024,6,18,22368.74],[2024,7,18,22016.28],[2024,8,18,22533.36],[2024,9,18,23306.35],[2024,10,18,22463.16],[2024,11,18,24598.59],[2024,12,18,22510.7],[2025,1,18,18514.52],[2025,2,18,22078.26],[2025,3,18,22738.69],[2025,4,18,22971.87],[2025,5,18,22480.61],[2025,6,18,22869.58],[2025,7,18,21894.35],[2025,8,18,23051.19],[2025,9,18,23712.03],[2025,10,18,24184.78],[2025,11,18,25575.81],[2025,12,18,21008.66],[2015,1,19,22676.0],[2015,2,19,24462.0],[2015,3,19,26682.0],[2015,4,19,25248.0],[2015,5,19,25413.0],[2015,6,19,18069.0],[2015,7,19,23910.0],[2015,8,19,25085.0],[2015,9,19,24690.0],[2015,10,19,25108.0],[2015,11,19,24642.0],[2015,12,19,19547.0],[2016,1,19,20716.0],[2016,2,19,22116.0],[2016,3,19,24153.0],[2016,4,19,24619.0],[2016,5,19,22762.0],[2016,6,19,22619.0],[2016,7,19,20572.0],[2016,8,19,21412.0],[2016,9,19,19273.0],[2016,10,19,19590.0],[2016,11,19,18658.0],[2016,12,19,18054.0],[2017,1,19,15878.0],[2017,2,19,18521.0],[2017,3,19,18325.0],[2017,4,19,20215.0],[2017,5,19,20034.0],[2017,6,19,22765.0],[2017,7,19,21974.0],[2017,8,19,17885.0],[2017,9,19,18720.0],[2017,10,19,17343.0],[2017,11,19,20357.0],[2017,12,19,21394.0],[2018,1,19,17008.22],[2018,2,19,18394.04],[2018,3,19,20707.02],[2018,4,19,17745.95],[2018,5,19,18180.93],[2018,6,19,18233.98],[2018,7,19,16117.27],[2018,8,19,18788.63],[2018,9,19,19847.08],[2018,10,19,19212.87],[2018,11,19,19160.11],[2018,12,19,17822.26],[2019,1,19,17966.04],[2019,2,19,18564.95],[2019,3,19,19118.07],[2019,4,19,19358.44],[2019,5,19,20554.04],[2019,6,19,18277.82],[2019,7,19,17056.09],[2019,8,19,19672.99],[2019,9,19,18657.07],[2019,10,19,21020.96],[2019,11,19,18927.82],[2019,12,19,17205.2],[2020,1,19,15452.38],[2020,2,19,16770.46],[2020,3,19,17912.8],[2020,4,19,13536.41],[2020,5,19,14272.9],[2020,6,19,14316.47],[2020,7,19,16062.3],[2020,8,19,16138.79],[2020,9,19,16361.11],[2020,10,19,15975.08],[2020,11,19,17636.81],[2020,12,19,17219.2],[2021,1,19,16735.16],[2021,2,19,17221.0],[2021,3,19,18610.55],[2021,4,19,17287.72],[2021,5,19,17513.71],[2021,6,19,17812.54],[2021,7,19,17042.7],[2021,8,19,17802.16],[2021,9,19,17621.12],[2021,10,19,17821.68],[2021,11,19,17533.81],[2021,12,19,16417.56],[2022,1,19,14320.23],[2022,2,19,15348.75],[2022,3,19,17837.08],[2022,4,19,16267.74],[2022,5,19,15752.36],[2022,6,19,18283.79],[2022,7,19,15754.13],[2022,8,19,16764.23],[2022,9,19,16151.61],[2022,10,19,15267.25],[2022,11,19,17668.07],[2022,12,19,15484.37],[2023,1,19,15829.06],[2023,2,19,15973.73],[2023,3,19,17341.82],[2023,4,19,16838.59],[2023,5,19,16338.03],[2023,6,19,16728.44],[2023,7,19,16401.97],[2023,8,19,17217.22],[2023,9,19,17605.16],[2023,10,19,17797.93],[2023,11,19,18369.39],[2023,12,19,17339.0],[2024,1,19,17397.42],[2024,2,19,18535.55],[2024,3,19,17778.64],[2024,4,19,19416.04],[2024,5,19,18598.12],[2024,6,19,18315.32],[2024,7,19,17639.72],[2024,8,19,18741.94],[2024,9,19,19423.39],[2024,10,19,19939.18],[2024,11,19,21309.08],[2024,12,19,18620.74],[2025,1,19,18025.01],[2025,2,19,19349.88],[2025,3,19,20171.11],[2025,4,19,20618.73],[2025,5,19,20428.75],[2025,6,19,19557.13],[2025,7,19,19751.62],[2025,8,19,20466.41],[2025,9,19,21003.88],[2025,10,19,21867.62],[2025,11,19,21936.03],[2025,12,19,21192.84],[2015,1,20,399449.0],[2015,2,20,401754.0],[2015,3,20,376766.0],[2015,4,20,384611.0],[2015,5,20,355866.0],[2015,6,20,355496.0],[2015,7,20,354348.0],[2015,8,20,386308.0],[2015,9,20,390097.0],[2015,10,20,405395.0],[2015,11,20,415324.0],[2015,12,20,402742.0],[2016,1,20,388871.0],[2016,2,20,403593.0],[2016,3,20,394616.0],[2016,4,20,380873.0],[2016,5,20,349053.0],[2016,6,20,357845.0],[2016,7,20,361691.0],[2016,8,20,363404.0],[2016,9,20,379224.0],[2016,10,20,380861.0],[2016,11,20,388050.0],[2016,12,20,383638.0],[2017,1,20,370993.0],[2017,2,20,376056.0],[2017,3,20,370715.0],[2017,4,20,384421.0],[2017,5,20,356579.0],[2017,6,20,374884.0],[2017,7,20,372223.0],[2017,8,20,376653.0],[2017,9,20,399779.0],[2017,10,20,394484.0],[2017,11,20,414594.0],[2017,12,20,412789.0],[2018,1,20,399012.73],[2018,2,20,413043.1],[2018,3,20,401215.42],[2018,4,20,389965.71],[2018,5,20,356986.09],[2018,6,20,345175.23],[2018,7,20,361245.69],[2018,8,20,380963.64],[2018,9,20,391218.95],[2018,10,20,390039.99],[2018,11,20,399048.95],[2018,12,20,400456.21],[2019,1,20,398768.74],[2019,2,20,406000.42],[2019,3,20,382358.43],[2019,4,20,378641.74],[2019,5,20,370109.28],[2019,6,20,367340.5],[2019,7,20,373631.11],[2019,8,20,385531.52],[2019,9,20,398132.21],[2019,10,20,414115.23],[2019,11,20,428623.44],[2019,12,20,420687.47],[2020,1,20,401030.22],[2020,2,20,394102.9],[2020,3,20,380624.18],[2020,4,20,348928.21],[2020,5,20,315626.88],[2020,6,20,325340.46],[2020,7,20,357521.15],[2020,8,20,378198.47],[2020,9,20,390524.37],[2020,10,20,402187.55],[2020,11,20,388161.32],[2020,12,20,387411.41],[2021,1,20,410506.68],[2021,2,20,405621.02],[2021,3,20,391394.91],[2021,4,20,393601.62],[2021,5,20,363278.79],[2021,6,20,367699.42],[2021,7,20,378361.85],[2021,8,20,388133.4],[2021,9,20,405223.36],[2021,10,20,407420.65],[2021,11,20,421306.3],[2021,12,20,423989.38],[2022,1,20,428354.48],[2022,2,20,421981.07],[2022,3,20,427583.05],[2022,4,20,435192.52],[2022,5,20,411504.38],[2022,6,20,383875.9],[2022,7,20,422165.29],[2022,8,20,436707.83],[2022,9,20,442857.24],[2022,10,20,434346.94],[2022,11,20,446665.17],[2022,12,20,435806.15],[2023,1,20,446217.86],[2023,2,20,460646.8],[2023,3,20,420918.26],[2023,4,20,442354.94],[2023,5,20,390217.45],[2023,6,20,404962.39],[2023,7,20,420179.47],[2023,8,20,451727.27],[2023,9,20,475350.89],[2023,10,20,476069.24],[2023,11,20,489493.4],[2023,12,20,493541.39],[2024,1,20,479059.24],[2024,2,20,489525.33],[2024,3,20,464554.25],[2024,4,20,463861.56],[2024,5,20,450536.01],[2024,6,20,450112.32],[2024,7,20,451623.44],[2024,8,20,472236.02],[2024,9,20,479986.05],[2024,10,20,474054.15],[2024,11,20,481915.48],[2024,12,20,470277.19],[2025,1,20,456959.42],[2025,2,20,473489.24],[2025,3,20,454058.44],[2025,4,20,465190.11],[2025,5,20,439526.0],[2025,6,20,436912.35],[2025,7,20,427701.68],[2025,8,20,455310.53],[2025,9,20,464064.63],[2025,10,20,464654.2],[2025,11,20,507718.99],[2025,12,20,469180.67],[2015,1,21,290445.0],[2015,2,21,367973.0],[2015,3,21,367743.0],[2015,4,21,364346.0],[2015,5,21,345429.0],[2015,6,21,344299.0],[2015,7,21,325279.0],[2015,8,21,338257.0],[2015,9,21,340227.0],[2015,10,21,346932.0],[2015,11,21,355324.0],[2015,12,21,342084.0],[2016,1,21,255484.0],[2016,2,21,320459.0],[2016,3,21,332768.0],[2016,4,21,316179.0],[2016,5,21,326829.0],[2016,6,21,333633.0],[2016,7,21,331825.0],[2016,8,21,333317.0],[2016,9,21,340872.0],[2016,10,21,326820.0],[2016,11,21,332451.0],[2016,12,21,329793.0],[2017,1,21,281124.0],[2017,2,21,319681.0],[2017,3,21,312904.0],[2017,4,21,346954.0],[2017,5,21,316958.0],[2017,6,21,346281.0],[2017,7,21,336447.0],[2017,8,21,342035.0],[2017,9,21,358982.0],[2017,10,21,346680.0],[2017,11,21,358294.0],[2017,12,21,352732.0],[2018,1,21,295112.77],[2018,2,21,329756.54],[2018,3,21,331995.38],[2018,4,21,343372.04],[2018,5,21,341566.01],[2018,6,21,325670.62],[2018,7,21,334069.12],[2018,8,21,346351.69],[2018,9,21,352665.02],[2018,10,21,339992.78],[2018,11,21,350706.51],[2018,12,21,333727.59],[2019,1,21,291657.41],[2019,2,21,340390.29],[2019,3,21,345635.4],[2019,4,21,345110.37],[2019,5,21,351339.83],[2019,6,21,345559.47],[2019,7,21,341130.31],[2019,8,21,352174.57],[2019,9,21,357140.78],[2019,10,21,365068.92],[2019,11,21,369950.58],[2019,12,21,339106.04],[2020,1,21,295504.06],[2020,2,21,343325.43],[2020,3,21,349344.64],[2020,4,21,296538.71],[2020,5,21,258332.64],[2020,6,21,290255.92],[2020,7,21,336092.66],[2020,8,21,367675.38],[2020,9,21,377241.0],[2020,10,21,386490.5],[2020,11,21,388293.61],[2020,12,21,354967.39],[2021,1,21,365575.91],[2021,2,21,379287.02],[2021,3,21,379054.35],[2021,4,21,382962.97],[2021,5,21,362463.97],[2021,6,21,366641.07],[2021,7,21,368780.97],[2021,8,21,376386.86],[2021,9,21,383225.28],[2021,10,21,382080.21],[2021,11,21,380491.45],[2021,12,21,361900.17],[2022,1,21,332145.67],[2022,2,21,355322.19],[2022,3,21,364350.71],[2022,4,21,392797.03],[2022,5,21,375584.46],[2022,6,21,388569.11],[2022,7,21,383246.7],[2022,8,21,396908.18],[2022,9,21,399015.45],[2022,10,21,385322.17],[2022,11,21,387690.72],[2022,12,21,366668.04],[2023,1,21,318226.54],[2023,2,21,368924.38],[2023,3,21,366091.58],[2023,4,21,408877.59],[2023,5,21,368590.9],[2023,6,21,381570.86],[2023,7,21,390125.44],[2023,8,21,381436.52],[2023,9,21,395850.08],[2023,10,21,390206.61],[2023,11,21,399470.06],[2023,12,21,388054.05],[2024,1,21,333585.98],[2024,2,21,375142.01],[2024,3,21,386367.54],[2024,4,21,399976.16],[2024,5,21,406842.65],[2024,6,21,404606.54],[2024,7,21,394883.14],[2024,8,21,421469.39],[2024,9,21,426451.35],[2024,10,21,406212.97],[2024,11,21,427679.45],[2024,12,21,390368.24],[2025,1,21,336891.15],[2025,2,21,392063.22],[2025,3,21,396284.93],[2025,4,21,408836.1],[2025,5,21,399159.34],[2025,6,21,418585.52],[2025,7,21,406057.74],[2025,8,21,428112.39],[2025,9,21,415443.38],[2025,10,21,419007.96],[2025,11,21,428949.25],[2025,12,21,393621.95],[2015,1,22,83637.0],[2015,2,22,79233.0],[2015,3,22,75441.0],[2015,4,22,86121.0],[2015,5,22,78752.0],[2015,6,22,79896.0],[2015,7,22,82033.0],[2015,8,22,84811.0],[2015,9,22,82733.0],[2015,10,22,80041.0],[2015,11,22,79941.0],[2015,12,22,77099.0],[2016,1,22,68382.0],[2016,2,22,61200.0],[2016,3,22,66985.0],[2016,4,22,74204.0],[2016,5,22,71318.0],[2016,6,22,73734.0],[2016,7,22,70953.0],[2016,8,22,72885.0],[2016,9,22,75516.0],[2016,10,22,72295.0],[2016,11,22,74749.0],[2016,12,22,69945.0],[2017,1,22,66635.0],[2017,2,22,59790.0],[2017,3,22,56686.0],[2017,4,22,72699.0],[2017,5,22,66291.0],[2017,6,22,72802.0],[2017,7,22,69951.0],[2017,8,22,70749.0],[2017,9,22,72236.0],[2017,10,22,60709.0],[2017,11,22,67912.0],[2017,12,22,71294.0],[2018,1,22,63442.18],[2018,2,22,64424.96],[2018,3,22,65890.82],[2018,4,22,69674.22],[2018,5,22,72768.62],[2018,6,22,70310.9],[2018,7,22,71570.31],[2018,8,22,74303.55],[2018,9,22,73184.63],[2018,10,22,76295.09],[2018,11,22,80753.44],[2018,12,22,79069.52],[2019,1,22,71009.02],[2019,2,22,72335.52],[2019,3,22,67327.2],[2019,4,22,65517.57],[2019,5,22,64942.84],[2019,6,22,67053.44],[2019,7,22,65839.84],[2019,8,22,68105.36],[2019,9,22,70191.69],[2019,10,22,67818.59],[2019,11,22,73616.51],[2019,12,22,70211.22],[2020,1,22,65217.21],[2020,2,22,66828.0],[2020,3,22,66335.13],[2020,4,22,67835.98],[2020,5,22,36167.71],[2020,6,22,48776.57],[2020,7,22,62993.91],[2020,8,22,73624.33],[2020,9,22,75986.21],[2020,10,22,76054.66],[2020,11,22,77802.09],[2020,12,22,72771.74],[2021,1,22,76538.71],[2021,2,22,76044.82],[2021,3,22,71191.78],[2021,4,22,76587.44],[2021,5,22,75337.37],[2021,6,22,77951.81],[2021,7,22,69748.22],[2021,8,22,77194.32],[2021,9,22,74981.16],[2021,10,22,77461.26],[2021,11,22,78368.18],[2021,12,22,77689.33],[2022,1,22,77634.83],[2022,2,22,75772.21],[2022,3,22,67951.81],[2022,4,22,77014.29],[2022,5,22,73754.04],[2022,6,22,75108.52],[2022,7,22,73194.32],[2022,8,22,72389.55],[2022,9,22,70750.73],[2022,10,22,67417.37],[2022,11,22,70853.58],[2022,12,22,68481.54],[2023,1,22,58043.42],[2023,2,22,62770.17],[2023,3,22,62481.62],[2023,4,22,73351.95],[2023,5,22,65259.74],[2023,6,22,70707.17],[2023,7,22,70756.79],[2023,8,22,64323.02],[2023,9,22,75190.16],[2023,10,22,69382.1],[2023,11,22,74682.77],[2023,12,22,72686.3],[2024,1,22,72780.94],[2024,2,22,77629.43],[2024,3,22,68875.44],[2024,4,22,75049.61],[2024,5,22,69743.53],[2024,6,22,68949.39],[2024,7,22,67301.14],[2024,8,22,77820.36],[2024,9,22,77913.3],[2024,10,22,73368.98],[2024,11,22,74667.67],[2024,12,22,70474.87],[2025,1,22,73054.33],[2025,2,22,70692.7],[2025,3,22,60988.34],[2025,4,22,71284.21],[2025,5,22,68076.58],[2025,6,22,68697.27],[2025,7,22,68470.38],[2025,8,22,72944.7],[2025,9,22,70559.76],[2025,10,22,71717.58],[2025,11,22,71728.08],[2025,12,22,70623.23],[2015,1,23,154943.0],[2015,2,23,187438.0],[2015,3,23,197059.0],[2015,4,23,196778.0],[2015,5,23,185913.0],[2015,6,23,185695.0],[2015,7,23,179107.0],[2015,8,23,182559.0],[2015,9,23,179573.0],[2015,10,23,173834.0],[2015,11,23,170977.0],[2015,12,23,168208.0],[2016,1,23,142216.0],[2016,2,23,163940.0],[2016,3,23,173889.0],[2016,4,23,179177.0],[2016,5,23,170161.0],[2016,6,23,175944.0],[2016,7,23,173958.0],[2016,8,23,172616.0],[2016,9,23,175163.0],[2016,10,23,171847.0],[2016,11,23,165398.0],[2016,12,23,166986.0],[2017,1,23,140960.0],[2017,2,23,167364.0],[2017,3,23,171141.0],[2017,4,23,183359.0],[2017,5,23,167198.0],[2017,6,23,178471.0],[2017,7,23,176411.0],[2017,8,23,175805.0],[2017,9,23,179669.0],[2017,10,23,170177.0],[2017,11,23,176900.0],[2017,12,23,178116.0],[2018,1,23,151389.54],[2018,2,23,171441.82],[2018,3,23,175152.72],[2018,4,23,178077.16],[2018,5,23,174913.67],[2018,6,23,173077.83],[2018,7,23,174931.74],[2018,8,23,180927.1],[2018,9,23,182255.55],[2018,10,23,175691.68],[2018,11,23,179745.12],[2018,12,23,166376.12],[2019,1,23,146497.9],[2019,2,23,168873.48],[2019,3,23,174318.25],[2019,4,23,174258.54],[2019,5,23,174684.48],[2019,6,23,173562.4],[2019,7,23,169126.13],[2019,8,23,179443.3],[2019,9,23,178201.69],[2019,10,23,180118.1],[2019,11,23,179853.42],[2019,12,23,165629.02],[2020,1,23,139497.99],[2020,2,23,166200.18],[2020,3,23,170161.72],[2020,4,23,138484.9],[2020,5,23,120048.3],[2020,6,23,136299.14],[2020,7,23,147349.25],[2020,8,23,160042.08],[2020,9,23,170102.76],[2020,10,23,171915.66],[2020,11,23,174231.64],[2020,12,23,168262.42],[2021,1,23,164217.14],[2021,2,23,167532.93],[2021,3,23,177171.44],[2021,4,23,176063.86],[2021,5,23,173197.28],[2021,6,23,174168.91],[2021,7,23,172264.62],[2021,8,23,175394.8],[2021,9,23,174180.73],[2021,10,23,174984.41],[2021,11,23,172326.38],[2021,12,23,168643.95],[2022,1,23,147641.52],[2022,2,23,156302.63],[2022,3,23,165132.16],[2022,4,23,168644.24],[2022,5,23,163335.25],[2022,6,23,168525.27],[2022,7,23,163471.83],[2022,8,23,168198.0],[2022,9,23,171056.56],[2022,10,23,160169.37],[2022,11,23,161852.73],[2022,12,23,158370.84],[2023,1,23,151003.89],[2023,2,23,159164.82],[2023,3,23,153695.25],[2023,4,23,177471.74],[2023,5,23,163552.18],[2023,6,23,172352.74],[2023,7,23,167868.36],[2023,8,23,169945.41],[2023,9,23,175824.94],[2023,10,23,169928.8],[2023,11,23,173849.85],[2023,12,23,163189.29],[2024,1,23,143971.5],[2024,2,23,161904.41],[2024,3,23,169480.74],[2024,4,23,171883.74],[2024,5,23,175615.36],[2024,6,23,174913.39],[2024,7,23,171714.1],[2024,8,23,179691.35],[2024,9,23,179606.85],[2024,10,23,156342.23],[2024,11,23,159286.47],[2024,12,23,146461.44],[2025,1,23,126620.2],[2025,2,23,145081.53],[2025,3,23,150114.15],[2025,4,23,151102.06],[2025,5,23,148040.39],[2025,6,23,151934.62],[2025,7,23,147653.39],[2025,8,23,153871.84],[2025,9,23,150507.19],[2025,10,23,153018.21],[2025,11,23,155804.01],[2025,12,23,141207.74],[2015,1,24,332256.0],[2015,2,24,345145.0],[2015,3,24,330601.0],[2015,4,24,364231.0],[2015,5,24,354498.0],[2015,6,24,361204.0],[2015,7,24,346770.0],[2015,8,24,346922.0],[2015,9,24,350046.0],[2015,10,24,329067.0],[2015,11,24,347431.0],[2015,12,24,320834.0],[2016,1,24,272291.0],[2016,2,24,294005.0],[2016,3,24,300730.0],[2016,4,24,325613.0],[2016,5,24,319335.0],[2016,6,24,321059.0],[2016,7,24,319800.0],[2016,8,24,327611.0],[2016,9,24,331467.0],[2016,10,24,322468.0],[2016,11,24,313503.0],[2016,12,24,317970.0],[2017,1,24,273449.0],[2017,2,24,289620.0],[2017,3,24,291437.0],[2017,4,24,325560.0],[2017,5,24,320090.0],[2017,6,24,329963.0],[2017,7,24,316356.0],[2017,8,24,331053.0],[2017,9,24,334962.0],[2017,10,24,318464.0],[2017,11,24,319092.0],[2017,12,24,313313.0],[2018,1,24,300079.2],[2018,2,24,299586.05],[2018,3,24,326060.88],[2018,4,24,331732.26],[2018,5,24,332967.55],[2018,6,24,306573.81],[2018,7,24,335193.56],[2018,8,24,341395.08],[2018,9,24,342656.43],[2018,10,24,342264.08],[2018,11,24,333673.48],[2018,12,24,307271.57],[2019,1,24,310058.2],[2019,2,24,306759.18],[2019,3,24,323037.02],[2019,4,24,331121.12],[2019,5,24,346317.56],[2019,6,24,339008.83],[2019,7,24,335538.99],[2019,8,24,340609.09],[2019,9,24,335980.75],[2019,10,24,348228.14],[2019,11,24,340291.38],[2019,12,24,328094.84],[2020,1,24,314279.63],[2020,2,24,318460.26],[2020,3,24,318072.88],[2020,4,24,231402.53],[2020,5,24,251282.02],[2020,6,24,296851.89],[2020,7,24,336759.04],[2020,8,24,352713.58],[2020,9,24,366651.25],[2020,10,24,389177.45],[2020,11,24,382972.8],[2020,12,24,383143.05],[2021,1,24,370670.85],[2021,2,24,352051.53],[2021,3,24,381628.76],[2021,4,24,382394.01],[2021,5,24,388012.83],[2021,6,24,393083.11],[2021,7,24,396945.79],[2021,8,24,399127.51],[2021,9,24,385747.18],[2021,10,24,390159.96],[2021,11,24,390891.89],[2021,12,24,383317.5],[2022,1,24,368017.1],[2022,2,24,354073.98],[2022,3,24,382522.62],[2022,4,24,389380.3],[2022,5,24,391232.92],[2022,6,24,373460.95],[2022,7,24,378543.54],[2022,8,24,380331.17],[2022,9,24,373063.1],[2022,10,24,363855.34],[2022,11,24,354989.39],[2022,12,24,327168.96],[2023,1,24,307542.22],[2023,2,24,297344.61],[2023,3,24,318870.37],[2023,4,24,349786.97],[2023,5,24,331808.12],[2023,6,24,360645.23],[2023,7,24,356777.49],[2023,8,24,371858.2],[2023,9,24,369351.87],[2023,10,24,367721.36],[2023,11,24,351234.39],[2023,12,24,341947.16],[2024,1,24,324221.93],[2024,2,24,329787.68],[2024,3,24,341741.51],[2024,4,24,360372.34],[2024,5,24,357571.77],[2024,6,24,357130.68],[2024,7,24,362282.31],[2024,8,24,389043.33],[2024,9,24,388573.49],[2024,10,24,387260.95],[2024,11,24,396630.95],[2024,12,24,370972.15],[2025,1,24,360690.51],[2025,2,24,360462.68],[2025,3,24,358533.93],[2025,4,24,396407.66],[2025,5,24,391380.07],[2025,6,24,396560.74],[2025,7,24,384112.67],[2025,8,24,397656.41],[2025,9,24,398793.61],[2025,10,24,384546.38],[2025,11,24,399139.84],[2025,12,24,379335.49],[2015,1,25,46571.0],[2015,2,25,57545.0],[2015,3,25,58713.0],[2015,4,25,57787.0],[2015,5,25,55654.0],[2015,6,25,54085.0],[2015,7,25,55215.0],[2015,8,25,55964.0],[2015,9,25,54175.0],[2015,10,25,56309.0],[2015,11,25,56804.0],[2015,12,25,54128.0],[2016,1,25,34187.0],[2016,2,25,42914.0],[2016,3,25,44859.0],[2016,4,25,46853.0],[2016,5,25,43018.0],[2016,6,25,44497.0],[2016,7,25,45258.0],[2016,8,25,45416.0],[2016,9,25,44754.0],[2016,10,25,42609.0],[2016,11,25,43983.0],[2016,12,25,44086.0],[2017,1,25,33591.0],[2017,2,25,41036.0],[2017,3,25,40491.0],[2017,4,25,44188.0],[2017,5,25,41461.0],[2017,6,25,44412.0],[2017,7,25,44107.0],[2017,8,25,43646.0],[2017,9,25,47020.0],[2017,10,25,44138.0],[2017,11,25,45088.0],[2017,12,25,44485.0],[2018,1,25,32686.87],[2018,2,25,40781.44],[2018,3,25,41363.53],[2018,4,25,43102.95],[2018,5,25,41523.8],[2018,6,25,39623.69],[2018,7,25,40012.64],[2018,8,25,41062.84],[2018,9,25,43147.51],[2018,10,25,41056.39],[2018,11,25,42449.38],[2018,12,25,39969.31],[2019,1,25,31067.09],[2019,2,25,39835.48],[2019,3,25,38920.87],[2019,4,25,39766.57],[2019,5,25,40595.91],[2019,6,25,38604.33],[2019,7,25,36672.63],[2019,8,25,38799.27],[2019,9,25,40387.54],[2019,10,25,41171.58],[2019,11,25,41982.31],[2019,12,25,39513.15],[2020,1,25,28363.31],[2020,2,25,36989.01],[2020,3,25,36988.46],[2020,4,25,29593.37],[2020,5,25,24345.55],[2020,6,25,26606.47],[2020,7,25,31948.15],[2020,8,25,37684.02],[2020,9,25,39923.23],[2020,10,25,41000.17],[2020,11,25,40086.36],[2020,12,25,36953.47],[2021,1,25,38013.88],[2021,2,25,40137.63],[2021,3,25,40330.33],[2021,4,25,42705.92],[2021,5,25,39313.98],[2021,6,25,40558.35],[2021,7,25,40021.48],[2021,8,25,40314.96],[2021,9,25,41842.04],[2021,10,25,41586.32],[2021,11,25,40255.83],[2021,12,25,39552.25],[2022,1,25,33754.94],[2022,2,25,36941.0],[2022,3,25,38446.93],[2022,4,25,42148.99],[2022,5,25,37529.42],[2022,6,25,39075.89],[2022,7,25,39365.05],[2022,8,25,39935.18],[2022,9,25,41512.71],[2022,10,25,39385.01],[2022,11,25,40101.6],[2022,12,25,38229.08],[2023,1,25,32410.59],[2023,2,25,36446.16],[2023,3,25,37027.28],[2023,4,25,42521.56],[2023,5,25,36390.62],[2023,6,25,39315.08],[2023,7,25,37732.14],[2023,8,25,38899.48],[2023,9,25,41631.0],[2023,10,25,40485.13],[2023,11,25,40922.29],[2023,12,25,39657.97],[2024,1,25,31942.4],[2024,2,25,37101.66],[2024,3,25,39455.24],[2024,4,25,41284.7],[2024,5,25,42153.39],[2024,6,25,41082.34],[2024,7,25,39069.99],[2024,8,25,41180.27],[2024,9,25,43251.77],[2024,10,25,45230.96],[2024,11,25,43349.53],[2024,12,25,39331.65],[2025,1,25,32680.83],[2025,2,25,38412.13],[2025,3,25,39572.17],[2025,4,25,39891.46],[2025,5,25,39580.53],[2025,6,25,40846.66],[2025,7,25,38308.02],[2025,8,25,40190.38],[2025,9,25,39822.42],[2025,10,25,41418.77],[2025,11,25,41794.43],[2025,12,25,37383.76],[2015,1,26,247.0],[2015,2,26,331.0],[2015,3,26,336.0],[2015,4,26,309.0],[2015,5,26,251.0],[2015,6,26,238.0],[2015,7,26,348.0],[2015,8,26,309.0],[2015,9,26,312.0],[2015,10,26,358.0],[2015,11,26,275.0],[2015,12,26,347.0],[2016,1,26,316.0],[2016,2,26,317.0],[2016,3,26,348.0],[2016,4,26,370.0],[2016,5,26,337.0],[2016,6,26,339.0],[2016,7,26,322.0],[2016,8,26,318.0],[2016,9,26,301.0],[2016,10,26,275.0],[2016,11,26,313.0],[2016,12,26,336.0],[2017,1,26,309.0],[2017,2,26,340.0],[2017,3,26,344.0],[2017,4,26,369.0],[2017,5,26,357.0],[2017,6,26,369.0],[2017,7,26,349.0],[2017,8,26,328.0],[2017,9,26,352.0],[2017,10,26,387.0],[2017,11,26,368.0],[2017,12,26,198.0],[2018,1,26,165.44],[2018,2,26,222.8],[2018,3,26,246.65],[2018,4,26,228.8],[2018,5,26,209.59],[2018,6,26,155.0],[2018,7,26,172.01],[2018,8,26,169.11],[2018,9,26,163.99],[2018,10,26,188.7],[2018,11,26,198.42],[2018,12,26,191.04],[2019,1,26,211.3],[2019,2,26,216.45],[2019,3,26,200.53],[2019,4,26,193.15],[2019,5,26,194.72],[2019,6,26,185.55],[2019,7,26,178.05],[2019,8,26,186.52],[2019,9,26,198.21],[2019,10,26,220.9],[2019,11,26,245.99],[2019,12,26,235.29],[2020,1,26,146.23],[2020,2,26,195.14],[2020,3,26,165.33],[2020,4,26,160.68],[2020,5,26,155.66],[2020,6,26,188.46],[2020,7,26,203.85],[2020,8,26,210.27],[2020,9,26,208.65],[2020,10,26,223.19],[2020,11,26,205.3],[2020,12,26,241.43],[2021,1,26,265.91],[2021,2,26,265.14],[2021,3,26,262.72],[2021,4,26,263.63],[2021,5,26,259.07],[2021,6,26,257.56],[2021,7,26,257.35],[2021,8,26,257.61],[2021,9,26,260.42],[2021,10,26,264.46],[2021,11,26,258.04],[2021,12,26,255.4],[2022,1,26,219.76],[2022,2,26,237.62],[2022,3,26,239.5],[2022,4,26,277.62],[2022,5,26,248.84],[2022,6,26,256.43],[2022,7,26,246.92],[2022,8,26,249.18],[2022,9,26,258.14],[2022,10,26,247.79],[2022,11,26,250.71],[2022,12,26,251.68],[2023,1,26,268.66],[2023,2,26,291.04],[2023,3,26,286.75],[2023,4,26,340.97],[2023,5,26,253.41],[2023,6,26,278.79],[2023,7,26,247.94],[2023,8,26,280.69],[2023,9,26,273.5],[2023,10,26,253.52],[2023,11,26,274.57],[2023,12,26,277.03],[2024,1,26,1610.6],[2024,2,26,1688.07],[2024,3,26,282.54],[2024,4,26,512.09],[2024,5,26,292.26],[2024,6,26,277.36],[2024,7,26,2078.94],[2024,8,26,254.33],[2024,9,26,209.57],[2024,10,26,202.16],[2024,11,26,205.2],[2024,12,26,215.32],[2025,1,26,180.82],[2025,2,26,177.0],[2025,3,26,191.7],[2025,4,26,176.92],[2025,5,26,181.74],[2025,6,26,206.99],[2025,7,26,216.03],[2025,8,26,174.14],[2025,9,26,304.32],[2025,10,26,258.31],[2025,11,26,297.6],[2025,12,26,300.38],[2015,1,27,55488.0],[2015,2,27,58373.0],[2015,3,27,61843.0],[2015,4,27,63974.0],[2015,5,27,58545.0],[2015,6,27,56379.0],[2015,7,27,55843.0],[2015,8,27,57502.0],[2015,9,27,57866.0],[2015,10,27,61008.0],[2015,11,27,63556.0],[2015,12,27,61329.0],[2016,1,27,52976.0],[2016,2,27,58087.0],[2016,3,27,61016.0],[2016,4,27,65128.0],[2016,5,27,63152.0],[2016,6,27,57638.0],[2016,7,27,56809.0],[2016,8,27,56931.0],[2016,9,27,59312.0],[2016,10,27,59119.0],[2016,11,27,63562.0],[2016,12,27,61920.0],[2017,1,27,61621.0],[2017,2,27,65350.0],[2017,3,27,63779.0],[2017,4,27,71293.0],[2017,5,27,65155.0],[2017,6,27,65475.0],[2017,7,27,61496.0],[2017,8,27,60561.0],[2017,9,27,63866.0],[2017,10,27,63997.0],[2017,11,27,67747.0],[2017,12,27,65211.0],[2018,1,27,62932.86],[2018,2,27,65649.18],[2018,3,27,68715.17],[2018,4,27,71850.34],[2018,5,27,67365.25],[2018,6,27,66517.03],[2018,7,27,64524.03],[2018,8,27,65636.46],[2018,9,27,67661.86],[2018,10,27,68883.6],[2018,11,27,71562.51],[2018,12,27,68657.7],[2019,1,27,66575.7],[2019,2,27,70842.59],[2019,3,27,71627.3],[2019,4,27,73929.1],[2019,5,27,71707.15],[2019,6,27,70596.02],[2019,7,27,64705.02],[2019,8,27,69166.33],[2019,9,27,66332.35],[2019,10,27,70466.95],[2019,11,27,72347.57],[2019,12,27,67623.23],[2020,1,27,67229.89],[2020,2,27,65827.56],[2020,3,27,72698.51],[2020,4,27,70207.34],[2020,5,27,67736.44],[2020,6,27,63895.41],[2020,7,27,66817.99],[2020,8,27,66827.37],[2020,9,27,67672.78],[2020,10,27,71892.32],[2020,11,27,71120.36],[2020,12,27,67945.5],[2021,1,27,70654.43],[2021,2,27,71927.07],[2021,3,27,71197.28],[2021,4,27,74112.95],[2021,5,27,70250.94],[2021,6,27,69374.12],[2021,7,27,67997.61],[2021,8,27,67992.76],[2021,9,27,70232.4],[2021,10,27,71418.59],[2021,11,27,71097.82],[2021,12,27,69858.33],[2022,1,27,64288.93],[2022,2,27,66574.03],[2022,3,27,68584.62],[2022,4,27,73440.28],[2022,5,27,68052.24],[2022,6,27,67315.02],[2022,7,27,66555.3],[2022,8,27,67725.02],[2022,9,27,68545.24],[2022,10,27,69209.3],[2022,11,27,71227.93],[2022,12,27,69237.57],[2023,1,27,65095.6],[2023,2,27,67345.09],[2023,3,27,68341.53],[2023,4,27,73953.49],[2023,5,27,68590.79],[2023,6,27,66775.81],[2023,7,27,63382.31],[2023,8,27,64910.13],[2023,9,27,66965.19],[2023,10,27,70260.82],[2023,11,27,72399.63],[2023,12,27,62536.03],[2024,1,27,53702.41],[2024,2,27,60613.11],[2024,3,27,66935.21],[2024,4,27,66779.31],[2024,5,27,64813.91],[2024,6,27,63622.13],[2024,7,27,58987.59],[2024,8,27,58706.52],[2024,9,27,60347.68],[2024,10,27,57152.46],[2024,11,27,63324.61],[2024,12,27,62004.14],[2025,1,27,64730.69],[2025,2,27,65848.23],[2025,3,27,69073.36],[2025,4,27,72251.8],[2025,5,27,67545.56],[2025,6,27,66282.43],[2025,7,27,62716.03],[2025,8,27,63456.36],[2025,9,27,65245.43],[2025,10,27,67318.75],[2025,11,27,71934.02],[2025,12,27,70162.74],[2015,1,28,579436.0],[2015,2,28,580571.0],[2015,3,28,576934.0],[2015,4,28,584525.0],[2015,5,28,554935.0],[2015,6,28,570825.0],[2015,7,28,551317.0],[2015,8,28,566286.0],[2015,9,28,556450.0],[2015,10,28,542261.0],[2015,11,28,529620.0],[2015,12,28,530475.0],[2016,1,28,547273.0],[2016,2,28,570262.0],[2016,3,28,567771.0],[2016,4,28,575935.0],[2016,5,28,526809.0],[2016,6,28,558600.0],[2016,7,28,547178.0],[2016,8,28,568330.0],[2016,9,28,568959.0],[2016,10,28,553858.0],[2016,11,28,557940.0],[2016,12,28,529211.0],[2017,1,28,543950.0],[2017,2,28,552285.0],[2017,3,28,544479.0],[2017,4,28,576213.0],[2017,5,28,536515.0],[2017,6,28,549083.0],[2017,7,28,538791.0],[2017,8,28,557340.0],[2017,9,28,563772.0],[2017,10,28,556531.0],[2017,11,28,578841.0],[2017,12,28,535819.0],[2018,1,28,565243.52],[2018,2,28,571161.57],[2018,3,28,565414.65],[2018,4,28,584458.38],[2018,5,28,558405.31],[2018,6,28,547913.31],[2018,7,28,550588.02],[2018,8,28,567037.91],[2018,9,28,574735.97],[2018,10,28,561237.92],[2018,11,28,577820.44],[2018,12,28,554048.83],[2019,1,28,574351.41],[2019,2,28,551254.14],[2019,3,28,560350.17],[2019,4,28,567017.79],[2019,5,28,558793.38],[2019,6,28,552325.21],[2019,7,28,533697.27],[2019,8,28,531544.56],[2019,9,28,564865.4],[2019,10,28,579863.73],[2019,11,28,570244.03],[2019,12,28,558035.01],[2020,1,28,568326.72],[2020,2,28,574346.46],[2020,3,28,602127.65],[2020,4,28,547039.55],[2020,5,28,529116.61],[2020,6,28,536067.92],[2020,7,28,569416.68],[2020,8,28,589017.33],[2020,9,28,610261.48],[2020,10,28,613225.33],[2020,11,28,614204.36],[2020,12,28,592246.56],[2021,1,28,623224.09],[2021,2,28,609215.09],[2021,3,28,616515.72],[2021,4,28,598983.15],[2021,5,28,570350.38],[2021,6,28,609892.46],[2021,7,28,605700.62],[2021,8,28,618759.24],[2021,9,28,626043.8],[2021,10,28,627055.63],[2021,11,28,640303.22],[2021,12,28,616240.01],[2022,1,28,608211.18],[2022,2,28,611116.98],[2022,3,28,620420.7],[2022,4,28,640583.36],[2022,5,28,622365.68],[2022,6,28,623560.15],[2022,7,28,610582.39],[2022,8,28,624308.44],[2022,9,28,644128.01],[2022,10,28,605952.12],[2022,11,28,614600.61],[2022,12,28,600697.42],[2023,1,28,578496.27],[2023,2,28,581951.65],[2023,3,28,585818.46],[2023,4,28,603327.12],[2023,5,28,571354.96],[2023,6,28,600979.61],[2023,7,28,565047.95],[2023,8,28,578547.52],[2023,9,28,591445.61],[2023,10,28,586221.44],[2023,11,28,615112.07],[2023,12,28,593641.92],[2024,1,28,581063.64],[2024,2,28,598737.37],[2024,3,28,601231.78],[2024,4,28,614385.12],[2024,5,28,632349.01],[2024,6,28,618998.71],[2024,7,28,599847.05],[2024,8,28,625903.19],[2024,9,28,625307.88],[2024,10,28,607561.09],[2024,11,28,640529.44],[2024,12,28,653785.02],[2025,1,28,626077.07],[2025,2,28,653857.48],[2025,3,28,634476.56],[2025,4,28,632446.14],[2025,5,28,644477.96],[2025,6,28,618313.77],[2025,7,28,614714.0],[2025,8,28,624496.73],[2025,9,28,624929.4],[2025,10,28,634039.77],[2025,11,28,611958.73],[2025,12,28,575941.74],[2015,1,29,130202.0],[2015,2,29,184010.0],[2015,3,29,189630.0],[2015,4,29,197193.0],[2015,5,29,185977.0],[2015,6,29,185383.0],[2015,7,29,176262.0],[2015,8,29,176707.0],[2015,9,29,172550.0],[2015,10,29,172745.0],[2015,11,29,177579.0],[2015,12,29,162900.0],[2016,1,29,101668.0],[2016,2,29,146556.0],[2016,3,29,164330.0],[2016,4,29,171403.0],[2016,5,29,168355.0],[2016,6,29,169343.0],[2016,7,29,168534.0],[2016,8,29,169485.0],[2016,9,29,173959.0],[2016,10,29,171610.0],[2016,11,29,172779.0],[2016,12,29,166431.0],[2017,1,29,113043.0],[2017,2,29,150050.0],[2017,3,29,166200.0],[2017,4,29,178019.0],[2017,5,29,164946.0],[2017,6,29,180548.0],[2017,7,29,173968.0],[2017,8,29,177342.0],[2017,9,29,182474.0],[2017,10,29,174758.0],[2017,11,29,179969.0],[2017,12,29,171997.0],[2018,1,29,128919.73],[2018,2,29,159087.22],[2018,3,29,171624.57],[2018,4,29,179290.33],[2018,5,29,171891.48],[2018,6,29,170045.89],[2018,7,29,164427.39],[2018,8,29,169423.85],[2018,9,29,172254.59],[2018,10,29,163863.64],[2018,11,29,176225.13],[2018,12,29,158279.15],[2019,1,29,119878.49],[2019,2,29,153995.01],[2019,3,29,166719.43],[2019,4,29,168302.96],[2019,5,29,168011.52],[2019,6,29,170084.21],[2019,7,29,161790.93],[2019,8,29,170715.8],[2019,9,29,171029.7],[2019,10,29,173121.55],[2019,11,29,174734.48],[2019,12,29,155453.5],[2020,1,29,123199.78],[2020,2,29,157145.49],[2020,3,29,168509.68],[2020,4,29,128590.68],[2020,5,29,74820.04],[2020,6,29,84383.06],[2020,7,29,123576.43],[2020,8,29,155814.28],[2020,9,29,168239.54],[2020,10,29,177174.07],[2020,11,29,177245.44],[2020,12,29,163577.07],[2021,1,29,160843.58],[2021,2,29,175615.43],[2021,3,29,174898.35],[2021,4,29,180912.65],[2021,5,29,165166.23],[2021,6,29,170567.45],[2021,7,29,171945.02],[2021,8,29,178912.29],[2021,9,29,181768.01],[2021,10,29,180993.58],[2021,11,29,183118.7],[2021,12,29,168851.1],[2022,1,29,139103.04],[2022,2,29,158645.85],[2022,3,29,168993.26],[2022,4,29,182064.52],[2022,5,29,169441.36],[2022,6,29,176314.89],[2022,7,29,173138.05],[2022,8,29,180810.56],[2022,9,29,183635.54],[2022,10,29,176856.14],[2022,11,29,177195.47],[2022,12,29,161428.44],[2023,1,29,123525.36],[2023,2,29,151104.44],[2023,3,29,163993.04],[2023,4,29,179716.76],[2023,5,29,158690.44],[2023,6,29,170734.89],[2023,7,29,166975.55],[2023,8,29,171870.79],[2023,9,29,178380.52],[2023,10,29,172310.96],[2023,11,29,174418.52],[2023,12,29,161994.82],[2024,1,29,120406.7],[2024,2,29,147362.46],[2024,3,29,165276.97],[2024,4,29,169099.2],[2024,5,29,170400.07],[2024,6,29,169134.49],[2024,7,29,163474.66],[2024,8,29,172498.41],[2024,9,29,178172.74],[2024,10,29,166078.77],[2024,11,29,176477.71],[2024,12,29,161971.77],[2025,1,29,117847.76],[2025,2,29,151018.1],[2025,3,29,161522.62],[2025,4,29,171090.59],[2025,5,29,164036.08],[2025,6,29,170650.72],[2025,7,29,161766.74],[2025,8,29,172303.17],[2025,9,29,170617.01],[2025,10,29,172314.35],[2025,11,29,173286.6],[2025,12,29,162221.15],[2015,1,30,264212.0],[2015,2,30,333009.0],[2015,3,30,333271.0],[2015,4,30,348976.0],[2015,5,30,316304.0],[2015,6,30,314767.0],[2015,7,30,302140.0],[2015,8,30,310065.0],[2015,9,30,305901.0],[2015,10,30,304155.0],[2015,11,30,308230.0],[2015,12,30,289398.0],[2016,1,30,215998.0],[2016,2,30,278271.0],[2016,3,30,295682.0],[2016,4,30,311393.0],[2016,5,30,297093.0],[2016,6,30,299047.0],[2016,7,30,299615.0],[2016,8,30,299701.0],[2016,9,30,296368.0],[2016,10,30,293241.0],[2016,11,30,303580.0],[2016,12,30,296075.0],[2017,1,30,251654.0],[2017,2,30,298377.0],[2017,3,30,291625.0],[2017,4,30,319805.0],[2017,5,30,283226.0],[2017,6,30,320836.0],[2017,7,30,304472.0],[2017,8,30,309764.0],[2017,9,30,329891.0],[2017,10,30,314020.0],[2017,11,30,327114.0],[2017,12,30,323622.0],[2018,1,30,299455.36],[2018,2,30,318194.62],[2018,3,30,318131.99],[2018,4,30,344925.54],[2018,5,30,331701.82],[2018,6,30,321413.9],[2018,7,30,330208.14],[2018,8,30,340655.91],[2018,9,30,340983.22],[2018,10,30,324076.09],[2018,11,30,333799.29],[2018,12,30,297027.6],[2019,1,30,287864.49],[2019,2,30,324635.42],[2019,3,30,326201.79],[2019,4,30,338734.36],[2019,5,30,344137.3],[2019,6,30,320840.69],[2019,7,30,317456.19],[2019,8,30,329795.24],[2019,9,30,327049.62],[2019,10,30,334733.01],[2019,11,30,324304.49],[2019,12,30,258527.1],[2020,1,30,264375.05],[2020,2,30,286955.54],[2020,3,30,300562.1],[2020,4,30,184578.7],[2020,5,30,152396.58],[2020,6,30,203764.7],[2020,7,30,248571.16],[2020,8,30,280761.42],[2020,9,30,302255.11],[2020,10,30,312400.04],[2020,11,30,314392.83],[2020,12,30,302343.8],[2021,1,30,305536.16],[2021,2,30,307129.8],[2021,3,30,317311.69],[2021,4,30,318504.88],[2021,5,30,308055.88],[2021,6,30,311272.85],[2021,7,30,299732.54],[2021,8,30,305941.01],[2021,9,30,309255.02],[2021,10,30,306838.24],[2021,11,30,302809.57],[2021,12,30,288346.07],[2022,1,30,266428.65],[2022,2,30,285376.41],[2022,3,30,300577.01],[2022,4,30,312133.5],[2022,5,30,298202.1],[2022,6,30,299488.12],[2022,7,30,297548.51],[2022,8,30,308285.47],[2022,9,30,312337.45],[2022,10,30,305214.68],[2022,11,30,305352.84],[2022,12,30,282091.78],[2023,1,30,271888.99],[2023,2,30,302294.97],[2023,3,30,308520.43],[2023,4,30,334925.47],[2023,5,30,302558.61],[2023,6,30,321313.32],[2023,7,30,306265.49],[2023,8,30,308798.97],[2023,9,30,327578.04],[2023,10,30,311378.94],[2023,11,30,321107.02],[2023,12,30,307645.87],[2024,1,30,264609.56],[2024,2,30,295019.53],[2024,3,30,316776.43],[2024,4,30,329534.1],[2024,5,30,328410.59],[2024,6,30,321894.26],[2024,7,30,315541.88],[2024,8,30,326297.86],[2024,9,30,335648.74],[2024,10,30,341383.41],[2024,11,30,348659.84],[2024,12,30,318034.03],[2025,1,30,283444.73],[2025,2,30,320067.43],[2025,3,30,322088.46],[2025,4,30,330786.34],[2025,5,30,320259.01],[2025,6,30,323564.19],[2025,7,30,307918.57],[2025,8,30,325515.09],[2025,9,30,325585.53],[2025,10,30,323666.67],[2025,11,30,327524.23],[2025,12,30,293241.38],[2015,1,31,36235.0],[2015,2,31,37404.0],[2015,3,31,35526.0],[2015,4,31,36105.0],[2015,5,31,34753.0],[2015,6,31,34085.0],[2015,7,31,34410.0],[2015,8,31,36029.0],[2015,9,31,34184.0],[2015,10,31,35731.0],[2015,11,31,36387.0],[2015,12,31,34208.0],[2016,1,31,29990.0],[2016,2,31,30692.0],[2016,3,31,30801.0],[2016,4,31,32865.0],[2016,5,31,31577.0],[2016,6,31,30988.0],[2016,7,31,30966.0],[2016,8,31,30935.0],[2016,9,31,33462.0],[2016,10,31,32033.0],[2016,11,31,33971.0],[2016,12,31,33343.0],[2017,1,31,30493.0],[2017,2,31,31854.0],[2017,3,31,30366.0],[2017,4,31,31992.0],[2017,5,31,28192.0],[2017,6,31,31461.0],[2017,7,31,31001.0],[2017,8,31,30627.0],[2017,9,31,32367.0],[2017,10,31,31522.0],[2017,11,31,32728.0],[2017,12,31,34571.0],[2018,1,31,29154.83],[2018,2,31,31797.86],[2018,3,31,29556.23],[2018,4,31,32047.34],[2018,5,31,30743.16],[2018,6,31,30016.05],[2018,7,31,29268.75],[2018,8,31,30293.78],[2018,9,31,31526.72],[2018,10,31,30556.78],[2018,11,31,31817.11],[2018,12,31,29663.76],[2019,1,31,22154.84],[2019,2,31,29754.25],[2019,3,31,28196.91],[2019,4,31,28025.19],[2019,5,31,28157.04],[2019,6,31,26631.75],[2019,7,31,26379.34],[2019,8,31,27701.46],[2019,9,31,28401.7],[2019,10,31,30864.62],[2019,11,31,31140.36],[2019,12,31,28774.12],[2020,1,31,24690.07],[2020,2,31,26451.39],[2020,3,31,25270.78],[2020,4,31,20940.2],[2020,5,31,18114.86],[2020,6,31,18186.11],[2020,7,31,20514.75],[2020,8,31,23122.83],[2020,9,31,23388.9],[2020,10,31,26122.24],[2020,11,31,25281.12],[2020,12,31,23951.13],[2021,1,31,23733.46],[2021,2,31,24384.57],[2021,3,31,24530.04],[2021,4,31,24337.17],[2021,5,31,23810.98],[2021,6,31,23444.07],[2021,7,31,23392.24],[2021,8,31,24289.72],[2021,9,31,24937.41],[2021,10,31,25127.83],[2021,11,31,25102.52],[2021,12,31,25050.54],[2022,1,31,21791.35],[2022,2,31,23082.04],[2022,3,31,23125.44],[2022,4,31,25539.56],[2022,5,31,23082.08],[2022,6,31,23946.02],[2022,7,31,23580.45],[2022,8,31,24426.18],[2022,9,31,25304.01],[2022,10,31,25845.68],[2022,11,31,26252.52],[2022,12,31,25547.46],[2023,1,31,24082.28],[2023,2,31,24398.31],[2023,3,31,22903.48],[2023,4,31,24887.66],[2023,5,31,22865.94],[2023,6,31,24463.84],[2023,7,31,23251.14],[2023,8,31,24812.65],[2023,9,31,26508.05],[2023,10,31,26675.6],[2023,11,31,27935.68],[2023,12,31,26949.18],[2024,1,31,26748.48],[2024,2,31,25570.9],[2024,3,31,24974.4],[2024,4,31,26280.01],[2024,5,31,26294.93],[2024,6,31,25543.28],[2024,7,31,23941.64],[2024,8,31,25850.99],[2024,9,31,26953.62],[2024,10,31,26185.33],[2024,11,31,28204.47],[2024,12,31,26050.99],[2025,1,31,23018.02],[2025,2,31,25088.8],[2025,3,31,24362.73],[2025,4,31,25169.32],[2025,5,31,24183.44],[2025,6,31,23841.54],[2025,7,31,22649.29],[2025,8,31,23953.44],[2025,9,31,24946.61],[2025,10,31,26181.15],[2025,11,31,28034.45],[2025,12,31,25943.55],[2015,1,32,13116.0],[2015,2,32,16873.0],[2015,3,32,17750.0],[2015,4,32,16592.0],[2015,5,32,15938.0],[2015,6,32,14840.0],[2015,7,32,14841.0],[2015,8,32,14916.0],[2015,9,32,15093.0],[2015,10,32,15180.0],[2015,11,32,15495.0],[2015,12,32,15065.0],[2016,1,32,10380.0],[2016,2,32,13398.0],[2016,3,32,13685.0],[2016,4,32,14756.0],[2016,5,32,13734.0],[2016,6,32,13647.0],[2016,7,32,14023.0],[2016,8,32,13156.0],[2016,9,32,13857.0],[2016,10,32,13424.0],[2016,11,32,13622.0],[2016,12,32,13636.0],[2017,1,32,10567.0],[2017,2,32,13816.0],[2017,3,32,13490.0],[2017,4,32,15014.0],[2017,5,32,12872.0],[2017,6,32,14341.0],[2017,7,32,14142.0],[2017,8,32,13557.0],[2017,9,32,15212.0],[2017,10,32,14046.0],[2017,11,32,14510.0],[2017,12,32,14154.0],[2018,1,32,10184.59],[2018,2,32,13716.37],[2018,3,32,13401.08],[2018,4,32,14825.18],[2018,5,32,13994.01],[2018,6,32,13871.25],[2018,7,32,13491.94],[2018,8,32,13759.6],[2018,9,32,14401.3],[2018,10,32,13251.04],[2018,11,32,13929.35],[2018,12,32,12768.75],[2019,1,32,10652.96],[2019,2,32,13688.77],[2019,3,32,12931.96],[2019,4,32,13770.51],[2019,5,32,13141.95],[2019,6,32,12804.86],[2019,7,32,12667.37],[2019,8,32,13064.6],[2019,9,32,13218.55],[2019,10,32,13378.99],[2019,11,32,13505.3],[2019,12,32,11694.12],[2020,1,32,11015.81],[2020,2,32,13342.85],[2020,3,32,12774.11],[2020,4,32,10178.09],[2020,5,32,9846.35],[2020,6,32,10903.14],[2020,7,32,12591.62],[2020,8,32,13349.36],[2020,9,32,14104.14],[2020,10,32,14810.2],[2020,11,32,14195.88],[2020,12,32,14443.93],[2021,1,32,14826.22],[2021,2,32,14623.75],[2021,3,32,14730.45],[2021,4,32,14829.25],[2021,5,32,14764.11],[2021,6,32,14729.79],[2021,7,32,14765.63],[2021,8,32,15152.62],[2021,9,32,15175.72],[2021,10,32,14523.03],[2021,11,32,14457.59],[2021,12,32,14961.26],[2022,1,32,13253.38],[2022,2,32,13526.28],[2022,3,32,14080.11],[2022,4,32,15316.36],[2022,5,32,14263.12],[2022,6,32,14556.23],[2022,7,32,14414.37],[2022,8,32,14698.35],[2022,9,32,15013.89],[2022,10,32,14481.46],[2022,11,32,14477.62],[2022,12,32,14603.09],[2023,1,32,12236.33],[2023,2,32,14230.38],[2023,3,32,14201.51],[2023,4,32,15394.88],[2023,5,32,12858.39],[2023,6,32,13066.7],[2023,7,32,12846.18],[2023,8,32,11224.38],[2023,9,32,13266.49],[2023,10,32,12991.87],[2023,11,32,12965.45],[2023,12,32,14989.22],[2024,1,32,14102.42],[2024,2,32,20117.85],[2024,3,32,16431.42],[2024,4,32,17412.36],[2024,5,32,17087.46],[2024,6,32,16518.2],[2024,7,32,15313.38],[2024,8,32,15722.38],[2024,9,32,16086.98],[2024,10,32,16972.55],[2024,11,32,17475.29],[2024,12,32,16558.8],[2025,1,32,13655.96],[2025,2,32,14977.41],[2025,3,32,14346.97],[2025,4,32,16338.68],[2025,5,32,15946.42],[2025,6,32,12607.8],[2025,7,32,13784.24],[2025,8,32,13828.69],[2025,9,32,13953.57],[2025,10,32,12707.03],[2025,11,32,15517.96],[2025,12,32,13643.87],[2015,1,33,717273.0],[2015,2,33,719467.0],[2015,3,33,759825.0],[2015,4,33,767963.0],[2015,5,33,776989.0],[2015,6,33,726821.0],[2015,7,33,704608.0],[2015,8,33,716819.0],[2015,9,33,699460.0],[2015,10,33,706752.0],[2015,11,33,702886.0],[2015,12,33,681131.0],[2016,1,33,620173.0],[2016,2,33,632881.0],[2016,3,33,645590.0],[2016,4,33,677453.0],[2016,5,33,695872.0],[2016,6,33,673119.0],[2016,7,33,731541.0],[2016,8,33,734456.0],[2016,9,33,669352.0],[2016,10,33,693624.0],[2016,11,33,666488.0],[2016,12,33,627243.0],[2017,1,33,617098.0],[2017,2,33,624436.0],[2017,3,33,682362.0],[2017,4,33,699931.0],[2017,5,33,664636.0],[2017,6,33,672184.0],[2017,7,33,729975.0],[2017,8,33,703106.0],[2017,9,33,754644.0],[2017,10,33,733917.0],[2017,11,33,741196.0],[2017,12,33,746302.0],[2018,1,33,719824.71],[2018,2,33,729973.69],[2018,3,33,784703.15],[2018,4,33,776722.46],[2018,5,33,740973.72],[2018,6,33,743372.62],[2018,7,33,782281.32],[2018,8,33,795740.26],[2018,9,33,766313.94],[2018,10,33,805522.17],[2018,11,33,796852.34],[2018,12,33,750467.31],[2019,1,33,737035.93],[2019,2,33,675796.62],[2019,3,33,682171.6],[2019,4,33,657760.55],[2019,5,33,690600.42],[2019,6,33,684067.65],[2019,7,33,691253.7],[2019,8,33,655920.24],[2019,9,33,676131.41],[2019,10,33,722933.89],[2019,11,33,642257.98],[2019,12,33,568931.45],[2020,1,33,586507.21],[2020,2,33,615447.26],[2020,3,33,664368.74],[2020,4,33,576116.03],[2020,5,33,590021.69],[2020,6,33,618887.38],[2020,7,33,673558.14],[2020,8,33,725611.33],[2020,9,33,744983.61],[2020,10,33,781304.79],[2020,11,33,763738.52],[2020,12,33,765527.61],[2021,1,33,793431.66],[2021,2,33,743572.41],[2021,3,33,806681.68],[2021,4,33,831536.4],[2021,5,33,848758.83],[2021,6,33,833460.58],[2021,7,33,848346.92],[2021,8,33,802999.17],[2021,9,33,839984.88],[2021,10,33,859872.14],[2021,11,33,824373.95],[2021,12,33,775671.35],[2022,1,33,776376.33],[2022,2,33,743804.09],[2022,3,33,823961.19],[2022,4,33,806317.58],[2022,5,33,843972.68],[2022,6,33,839619.8],[2022,7,33,868981.92],[2022,8,33,844420.72],[2022,9,33,834944.14],[2022,10,33,834992.56],[2022,11,33,767210.33],[2022,12,33,723537.19],[2023,1,33,666282.01],[2023,2,33,701530.01],[2023,3,33,718971.33],[2023,4,33,656495.13],[2023,5,33,765355.71],[2023,6,33,742755.5],[2023,7,33,759405.35],[2023,8,33,767483.34],[2023,9,33,753633.25],[2023,10,33,786210.68],[2023,11,33,764952.43],[2023,12,33,731761.38],[2024,1,33,750301.23],[2024,2,33,760469.06],[2024,3,33,760637.19],[2024,4,33,803765.18],[2024,5,33,839791.07],[2024,6,33,821845.68],[2024,7,33,840082.97],[2024,8,33,864456.3],[2024,9,33,848111.66],[2024,10,33,833692.68],[2024,11,33,820665.96],[2024,12,33,806918.84],[2025,1,33,786439.01],[2025,2,33,754681.61],[2025,3,33,801949.64],[2025,4,33,696790.8],[2025,5,33,798606.19],[2025,6,33,792522.89],[2025,7,33,803023.44],[2025,8,33,817185.92],[2025,9,33,793636.52],[2025,10,33,828195.58],[2025,11,33,843182.08],[2025,12,33,781081.59],[2015,1,34,8093.0],[2015,2,34,8102.0],[2015,3,34,7172.0],[2015,4,34,7311.0],[2015,5,34,6960.0],[2015,6,34,6785.0],[2015,7,34,6601.0],[2015,8,34,6702.0],[2015,9,34,6610.0],[2015,10,34,7165.0],[2015,11,34,7449.0],[2015,12,34,7442.0],[2016,1,34,7460.0],[2016,2,34,7646.0],[2016,3,34,8029.0],[2016,4,34,8763.0],[2016,5,34,8103.0],[2016,6,34,7289.0],[2016,7,34,7211.0],[2016,8,34,7258.0],[2016,9,34,5842.0],[2016,10,34,7204.0],[2016,11,34,7230.0],[2016,12,34,6634.0],[2017,1,34,6696.0],[2017,2,34,6548.0],[2017,3,34,6992.0],[2017,4,34,6736.0],[2017,5,34,6198.0],[2017,6,34,6385.0],[2017,7,34,6191.0],[2017,8,34,6114.0],[2017,9,34,6626.0],[2017,10,34,6888.0],[2017,11,34,6661.0],[2017,12,34,6784.0],[2018,1,34,4270.63],[2018,2,34,4569.35],[2018,3,34,4667.17],[2018,4,34,4640.98],[2018,5,34,4371.46],[2018,6,34,4059.66],[2018,7,34,4054.97],[2018,8,34,5438.37],[2018,9,34,5363.78],[2018,10,34,5479.19],[2018,11,34,5517.36],[2018,12,34,5786.12],[2019,1,34,5675.38],[2019,2,34,5485.45],[2019,3,34,5710.29],[2019,4,34,5198.24],[2019,5,34,5592.5],[2019,6,34,4876.73],[2019,7,34,4438.02],[2019,8,34,4681.29],[2019,9,34,4590.09],[2019,10,34,6730.84],[2019,11,34,6380.86],[2019,12,34,5467.69],[2020,1,34,5399.45],[2020,2,34,5946.7],[2020,3,34,5054.65],[2020,4,34,4776.57],[2020,5,34,4556.29],[2020,6,34,4622.98],[2020,7,34,4915.07],[2020,8,34,4840.8],[2020,9,34,5078.34],[2020,10,34,5336.73],[2020,11,34,4653.3],[2020,12,34,4620.47],[2021,1,34,4621.3],[2021,2,34,4824.45],[2021,3,34,5079.4],[2021,4,34,4784.79],[2021,5,34,4681.96],[2021,6,34,4553.57],[2021,7,34,4326.99],[2021,8,34,4048.9],[2021,9,34,3895.29],[2021,10,34,3321.3],[2021,11,34,3601.16],[2021,12,34,3436.69],[2022,1,34,3013.8],[2022,2,34,2927.36],[2022,3,34,2405.81],[2022,4,34,2581.36],[2022,5,34,2431.61],[2022,6,34,2342.74],[2022,7,34,2329.8],[2022,8,34,2673.35],[2022,9,34,2444.5],[2022,10,34,2324.17],[2022,11,34,2408.57],[2022,12,34,2752.22],[2023,1,34,5635.62],[2023,2,34,6674.18],[2023,3,34,5278.57],[2023,4,34,5902.29],[2023,5,34,6214.93],[2023,6,34,6395.47],[2023,7,34,5844.93],[2023,8,34,5388.16],[2023,9,34,7159.57],[2023,10,34,6186.22],[2023,11,34,6047.22],[2023,12,34,7402.03],[2024,1,34,6138.37],[2024,2,34,7553.0],[2024,3,34,6925.7],[2024,4,34,7503.81],[2024,5,34,6754.06],[2024,6,34,7281.58],[2024,7,34,5957.7],[2024,8,34,6664.98],[2024,9,34,6986.79],[2024,10,34,7036.48],[2024,11,34,7492.47],[2024,12,34,6922.92],[2025,1,34,6618.2],[2025,2,34,7404.65],[2025,3,34,6767.54],[2025,4,34,6726.35],[2025,5,34,5560.87],[2025,6,34,5722.23],[2025,7,34,5369.01],[2025,8,34,5753.3],[2025,9,34,5540.77],[2025,10,34,5603.3],[2025,11,34,5637.11],[2025,12,34,5254.95],[2015,1,35,14149.0],[2015,2,35,19678.0],[2015,3,35,20009.0],[2015,4,35,20199.0],[2015,5,35,18408.0],[2015,6,35,18247.0],[2015,7,35,18873.0],[2015,8,35,19015.0],[2015,9,35,18617.0],[2015,10,35,19247.0],[2015,11,35,18679.0],[2015,12,35,17450.0],[2016,1,35,12220.0],[2016,2,35,17259.0],[2016,3,35,17991.0],[2016,4,35,18621.0],[2016,5,35,18133.0],[2016,6,35,18186.0],[2016,7,35,18516.0],[2016,8,35,18790.0],[2016,9,35,18658.0],[2016,10,35,18663.0],[2016,11,35,18587.0],[2016,12,35,19066.0],[2017,1,35,12545.0],[2017,2,35,17517.0],[2017,3,35,18975.0],[2017,4,35,18974.0],[2017,5,35,18637.0],[2017,6,35,19007.0],[2017,7,35,19046.0],[2017,8,35,19403.0],[2017,9,35,19569.0],[2017,10,35,18505.0],[2017,11,35,18755.0],[2017,12,35,18068.0],[2018,1,35,12200.69],[2018,2,35,16525.95],[2018,3,35,18642.78],[2018,4,35,18531.68],[2018,5,35,17335.73],[2018,6,35,15961.11],[2018,7,35,15974.84],[2018,8,35,16372.65],[2018,9,35,17515.07],[2018,10,35,17077.77],[2018,11,35,17505.03],[2018,12,35,15989.19],[2019,1,35,11397.27],[2019,2,35,15627.7],[2019,3,35,16640.4],[2019,4,35,15938.24],[2019,5,35,16415.83],[2019,6,35,15294.15],[2019,7,35,14555.27],[2019,8,35,15716.92],[2019,9,35,15650.4],[2019,10,35,16928.93],[2019,11,35,17044.23],[2019,12,35,15443.54],[2020,1,35,9523.28],[2020,2,35,13198.11],[2020,3,35,13952.67],[2020,4,35,9056.44],[2020,5,35,8693.74],[2020,6,35,8766.55],[2020,7,35,9743.46],[2020,8,35,11212.88],[2020,9,35,12387.5],[2020,10,35,13543.83],[2020,11,35,13004.61],[2020,12,35,10952.37],[2021,1,35,11850.23],[2021,2,35,12938.73],[2021,3,35,14150.94],[2021,4,35,14291.21],[2021,5,35,12298.21],[2021,6,35,11873.64],[2021,7,35,11972.72],[2021,8,35,14545.54],[2021,9,35,14914.37],[2021,10,35,14585.78],[2021,11,35,14214.44],[2021,12,35,14549.8],[2022,1,35,11428.26],[2022,2,35,13247.64],[2022,3,35,14351.67],[2022,4,35,15735.52],[2022,5,35,13985.6],[2022,6,35,15324.07],[2022,7,35,14862.42],[2022,8,35,15427.76],[2022,9,35,16132.08],[2022,10,35,15632.26],[2022,11,35,15095.36],[2022,12,35,13949.9],[2023,1,35,10412.78],[2023,2,35,12949.28],[2023,3,35,13832.83],[2023,4,35,15480.44],[2023,5,35,13347.29],[2023,6,35,14344.32],[2023,7,35,14034.97],[2023,8,35,14373.81],[2023,9,35,15113.43],[2023,10,35,13976.73],[2023,11,35,14208.07],[2023,12,35,13337.05],[2024,1,35,10972.43],[2024,2,35,13275.56],[2024,3,35,14368.09],[2024,4,35,15140.93],[2024,5,35,15171.47],[2024,6,35,14525.44],[2024,7,35,14826.06],[2024,8,35,15304.61],[2024,9,35,15144.5],[2024,10,35,15325.42],[2024,11,35,15504.19],[2024,12,35,14379.81],[2025,1,35,11230.54],[2025,2,35,13517.34],[2025,3,35,14623.89],[2025,4,35,15022.49],[2025,5,35,14567.53],[2025,6,35,15300.58],[2025,7,35,14513.95],[2025,8,35,15647.47],[2025,9,35,15415.19],[2025,10,35,16146.21],[2025,11,35,16206.07],[2025,12,35,14121.89],[2015,1,36,4636.0],[2015,2,36,4877.0],[2015,3,36,4605.0],[2015,4,36,4762.0],[2015,5,36,4412.0],[2015,6,36,4359.0],[2015,7,36,4240.0],[2015,8,36,4321.0],[2015,9,36,4193.0],[2015,10,36,4378.0],[2015,11,36,4491.0],[2015,12,36,4498.0],[2016,1,36,4340.0],[2016,2,36,4367.0],[2016,3,36,4333.0],[2016,4,36,4771.0],[2016,5,36,4459.0],[2016,6,36,4019.0],[2016,7,36,4047.0],[2016,8,36,3871.0],[2016,9,36,3936.0],[2016,10,36,3891.0],[2016,11,36,4019.0],[2016,12,36,2641.0],[2017,1,36,2629.0],[2017,2,36,2516.0],[2017,3,36,2697.0],[2017,4,36,2594.0],[2017,5,36,2305.0],[2017,6,36,2402.0],[2017,7,36,2380.0],[2017,8,36,2296.0],[2017,9,36,2583.0],[2017,10,36,2574.0],[2017,11,36,2497.0],[2017,12,36,2605.0],[2018,1,36,2447.59],[2018,2,36,2730.88],[2018,3,36,2673.9],[2018,4,36,2785.43],[2018,5,36,2611.93],[2018,6,36,2459.15],[2018,7,36,2444.97],[2018,8,36,2362.06],[2018,9,36,2733.3],[2018,10,36,2742.43],[2018,11,36,3011.31],[2018,12,36,3018.67],[2019,1,36,2784.15],[2019,2,36,3025.26],[2019,3,36,2853.56],[2019,4,36,2844.88],[2019,5,36,2864.32],[2019,6,36,2801.86],[2019,7,36,2604.48],[2019,8,36,2594.49],[2019,9,36,2756.58],[2019,10,36,2886.43],[2019,11,36,2997.9],[2019,12,36,3172.55],[2020,1,36,2664.95],[2020,2,36,2984.92],[2020,3,36,3030.39],[2020,4,36,2899.93],[2020,5,36,2528.46],[2020,6,36,2398.43],[2020,7,36,2536.49],[2020,8,36,2466.94],[2020,9,36,2805.93],[2020,10,36,3001.84],[2020,11,36,2895.42],[2020,12,36,3077.62],[2021,1,36,2898.53],[2021,2,36,2986.82],[2021,3,36,3007.09],[2021,4,36,2956.88],[2021,5,36,2842.82],[2021,6,36,2923.85],[2021,7,36,2931.66],[2021,8,36,2890.15],[2021,9,36,2882.77],[2021,10,36,2793.13],[2021,11,36,2867.1],[2021,12,36,2921.12],[2022,1,36,2557.31],[2022,2,36,2455.86],[2022,3,36,1993.27],[2022,4,36,2091.26],[2022,5,36,1872.66],[2022,6,36,1932.71],[2022,7,36,1891.96],[2022,8,36,1851.3],[2022,9,36,1924.28],[2022,10,36,1803.58],[2022,11,36,1823.57],[2022,12,36,1829.1],[2023,1,36,1667.81],[2023,2,36,1849.76],[2023,3,36,1966.89],[2023,4,36,1995.68],[2023,5,36,1770.87],[2023,6,36,1892.62],[2023,7,36,1779.52],[2023,8,36,1904.32],[2023,9,36,1994.36],[2023,10,36,1873.87],[2023,11,36,2017.24],[2023,12,36,2029.1],[2024,1,36,1878.95],[2024,2,36,2098.28],[2024,3,36,2157.48],[2024,4,36,2053.45],[2024,5,36,2251.3],[2024,6,36,1978.76],[2024,7,36,1805.16],[2024,8,36,1963.51],[2024,9,36,2113.06],[2024,10,36,2349.97],[2024,11,36,2382.36],[2024,12,36,2418.21],[2025,1,36,2203.31],[2025,2,36,2375.54],[2025,3,36,2468.0],[2025,4,36,2136.01],[2025,5,36,1928.73],[2025,6,36,1942.02],[2025,7,36,1884.89],[2025,8,36,2106.09],[2025,9,36,2067.86],[2025,10,36,2175.93],[2025,11,36,2240.14],[2025,12,36,2275.17]]};
+  </script>
+  <script>
+    (function () {
+      "use strict";
+
+      const MES_NOME = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+      const PERIODO_ORDEM = ["Pré-pandemia", "Pandemia", "Pós-pandemia"];
+      const OVERLAY_COLORS = ["#2F62C8","#E8A317","#2E9E62","#7B61FF","#E05A4F","#1AA7A1","#D4537E","#5B8DEF"];
+
+      if (window.ChartDataLabels) Chart.register(ChartDataLabels);
+      Chart.defaults.color = "#5C6B82";
+      Chart.defaults.borderColor = "rgba(28, 43, 68, 0.08)";
+      Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+      Chart.defaults.plugins.datalabels = { display: false };
+
+      function fmt(n) {
+        if (n === null || n === undefined || Number.isNaN(Number(n))) return "—";
+        return Number(n).toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+      function fmtPct(n) {
+        if (n === null || n === undefined || Number.isNaN(Number(n))) return "—";
+        const sign = n > 0 ? "+" : "";
+        return sign + Number(n).toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }) + "%";
+      }
+      function periodoDeAno(ano) {
+        if (ano <= 2019) return "Pré-pandemia";
+        if (ano === 2020) return "Pandemia";
+        return "Pós-pandemia";
+      }
+      function mean(arr) {
+        if (!arr.length) return 0;
+        return arr.reduce((a, b) => a + b, 0) / arr.length;
+      }
+      function sum(arr) {
+        return arr.reduce((a, b) => a + b, 0);
+      }
+      function linearRegression(xs, ys) {
+        const n = xs.length;
+        if (n < 2) return { slope: 0, intercept: ys[0] || 0 };
+        let sx = 0, sy = 0, sxy = 0, sx2 = 0;
+        for (let i = 0; i < n; i++) {
+          sx += xs[i]; sy += ys[i]; sxy += xs[i] * ys[i]; sx2 += xs[i] * xs[i];
+        }
+        const den = n * sx2 - sx * sx;
+        const slope = den === 0 ? 0 : (n * sxy - sx * sy) / den;
+        const intercept = (sy - slope * sx) / n;
+        return { slope, intercept };
+      }
+      function classeVar(v) {
+        if (v === null || Number.isNaN(v)) return "estável";
+        if (v > 5) return "crescente";
+        if (v < -5) return "decrescente";
+        return "estável";
+      }
+      function fmtShort(n) {
+        if (n === null || n === undefined || Number.isNaN(Number(n))) return "—";
+        const abs = Math.abs(Number(n));
+        if (abs >= 1e6) {
+          return (n / 1e6).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " mi";
+        }
+        if (abs >= 1e3) {
+          return (n / 1e3).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " mil";
+        }
+        return fmt(n);
+      }
+      function heatColor(t) {
+        const c0 = [255, 251, 242];
+        const c1 = [232, 163, 23];
+        const r = Math.round(c0[0] + (c1[0] - c0[0]) * t);
+        const g = Math.round(c0[1] + (c1[1] - c0[1]) * t);
+        const b = Math.round(c0[2] + (c1[2] - c0[2]) * t);
+        return "rgb(" + r + "," + g + "," + b + ")";
+      }
+      function barLabels(extra) {
+        extra = extra || {};
+        return Object.assign({
+          display: true,
+          color: "#16325C",
+          font: { size: 10, weight: "600" },
+          formatter: function (v) { return fmtShort(v); },
+          anchor: "end",
+          align: "top",
+          clamp: true,
+          clip: false
+        }, extra);
+      }
+
+      const yearAxisPlugin = {
+        id: "yearAxis",
+        afterDraw: function (chart) {
+          const x = chart.scales.x;
+          const labels = chart.data.labels || [];
+          if (!x || !labels.length) return;
+          const byYear = new Map();
+          labels.forEach(function (lab, i) {
+            const year = String(lab).slice(0, 4);
+            if (!byYear.has(year)) byYear.set(year, { first: i, last: i });
+            else byYear.get(year).last = i;
+          });
+          const ctx = chart.ctx;
+          ctx.save();
+          ctx.strokeStyle = "rgba(28, 43, 68, 0.18)";
+          ctx.lineWidth = 1;
+          byYear.forEach(function (range) {
+            const px = x.getPixelForValue(range.first);
+            ctx.beginPath();
+            ctx.moveTo(px, x.top);
+            ctx.lineTo(px, x.bottom);
+            ctx.stroke();
+          });
+          ctx.fillStyle = "#16325C";
+          ctx.font = "600 12px IBM Plex Sans, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          const yPos = x.bottom + 10;
+          byYear.forEach(function (range, year) {
+            const left = x.getPixelForValue(range.first);
+            const right = x.getPixelForValue(range.last);
+            ctx.fillText(year, (left + right) / 2, yPos);
+          });
+          ctx.restore();
+        }
+      };
+
+      const pandemicBandPlugin = {
+        id: "pandemicBand",
+        beforeDatasetsDraw: function (chart) {
+          const x = chart.scales.x;
+          const y = chart.scales.y;
+          const labels = chart.data.labels || [];
+          if (!x || !labels.length) return;
+          let first = -1, last = -1;
+          labels.forEach(function (lab, i) {
+            if (String(lab).indexOf("2020") === 0) {
+              if (first < 0) first = i;
+              last = i;
+            }
+          });
+          if (first < 0) return;
+          const ctx = chart.ctx;
+          const left = x.getPixelForValue(first);
+          const right = x.getPixelForValue(last);
+          ctx.save();
+          ctx.fillStyle = "rgba(224, 90, 79, 0.18)";
+          ctx.fillRect(left, y.top, Math.max(right - left, 2), y.bottom - y.top);
+          ctx.restore();
+        }
+      };
+
+      let RAW = [];
+      let SETORES = [];
+      let CODIGOS = [];
+      const charts = {};
+      let tableState = { key: "total", dir: -1, rows: [] };
+
+      function expandPayload(payload) {
+        SETORES = payload.setores;
+        CODIGOS = payload.codigos;
+        RAW = payload.rows.map(function (r) {
+          return {
+            ano: r[0],
+            mes: r[1],
+            mesNome: MES_NOME[r[1] - 1],
+            setorIdx: r[2],
+            setor: SETORES[r[2]],
+            codigo: CODIGOS[r[2]],
+            consumo: r[3],
+            periodo: periodoDeAno(r[0])
+          };
+        });
+      }
+
+      function selectedYears() {
+        const de = Number(document.getElementById("anoDe").value);
+        const ate = Number(document.getElementById("anoAte").value);
+        const a = Math.min(de, ate);
+        const b = Math.max(de, ate);
+        return { de: a, ate: b };
+      }
+      function markedSetores() {
+        return Array.from(document.querySelectorAll("#setorChips .chip.selected")).map(function (el) {
+          return Number(el.getAttribute("data-idx"));
+        });
+      }
+      function selectedSetores() {
+        const marked = markedSetores();
+        const restrict = document.getElementById("restringirSetores").checked;
+        if (restrict && marked.length) return marked;
+        return SETORES.map(function (_, i) { return i; });
+      }
+      function overlaySetores() {
+        return markedSetores().slice(0, 8);
+      }
+      function filteredRows() {
+        const y = selectedYears();
+        const setores = new Set(selectedSetores());
+        return RAW.filter(function (r) {
+          return r.ano >= y.de && r.ano <= y.ate && setores.has(r.setorIdx);
+        });
+      }
+
+      function monthlyTotals(rows) {
+        const map = new Map();
+        rows.forEach(function (r) {
+          const k = r.ano + "-" + String(r.mes).padStart(2, "0");
+          map.set(k, (map.get(k) || 0) + r.consumo);
+        });
+        return Array.from(map.entries()).sort(function (a, b) { return a[0] < b[0] ? -1 : 1; })
+          .map(function (e) {
+            const parts = e[0].split("-");
+            return { key: e[0], ano: Number(parts[0]), mes: Number(parts[1]), total: e[1] };
+          });
+      }
+
+      function bySetor(rows) {
+        const acc = new Map();
+        rows.forEach(function (r) {
+          if (!acc.has(r.setorIdx)) {
+            acc.set(r.setorIdx, {
+              idx: r.setorIdx,
+              setor: r.setor,
+              codigo: r.codigo,
+              valores: [],
+              porAno: new Map(),
+              porPeriodoMes: { "Pré-pandemia": new Map(), "Pandemia": new Map(), "Pós-pandemia": new Map() }
+            });
+          }
+          const o = acc.get(r.setorIdx);
+          o.valores.push(r.consumo);
+          o.porAno.set(r.ano, (o.porAno.get(r.ano) || 0) + r.consumo);
+          const mk = r.ano + "-" + r.mes;
+          const pm = o.porPeriodoMes[r.periodo];
+          pm.set(mk, (pm.get(mk) || 0) + r.consumo);
+        });
+        return acc;
+      }
+
+      function variationFirstLast(porAno, de, ate) {
+        const first = porAno.get(de);
+        const last = porAno.get(ate);
+        if (!first || first === 0 || last === undefined) return null;
+        return ((last - first) / first) * 100;
+      }
+
+      function destroyChart(id) {
+        if (charts[id]) { charts[id].destroy(); charts[id] = null; }
+      }
+
+      function tooltipMWh(ctx) {
+        const horizontal = ctx.chart.options.indexAxis === "y";
+        const v = horizontal ? ctx.parsed.x : ctx.parsed.y;
+        return ctx.dataset.label + ": " + fmt(v) + " MWh";
+      }
+
+      function renderKpis(rows, de, ate) {
+        const months = monthlyTotals(rows);
+        const total = sum(months.map(function (m) { return m.total; }));
+        const byYear = new Map();
+        months.forEach(function (m) { byYear.set(m.ano, (byYear.get(m.ano) || 0) + m.total); });
+        const varTotal = variationFirstLast(byYear, de, ate);
+
+        const setores = bySetor(rows);
+        let topMedia = null;
+        let topCresc = null;
+        setores.forEach(function (s) {
+          const media = mean(s.valores);
+          if (!topMedia || media > topMedia.media) topMedia = { setor: s.setor, media: media };
+          const v = variationFirstLast(s.porAno, de, ate);
+          if (v !== null && (!topCresc || v > topCresc.v)) topCresc = { setor: s.setor, v: v };
+        });
+
+        const byMes = new Map();
+        months.forEach(function (m) {
+          if (!byMes.has(m.mes)) byMes.set(m.mes, []);
+          byMes.get(m.mes).push(m.total);
+        });
+        let topMes = { mes: 1, media: -Infinity };
+        byMes.forEach(function (vals, mes) {
+          const m = mean(vals);
+          if (m > topMes.media) topMes = { mes: mes, media: m };
+        });
+
+        const varClass = varTotal === null ? "" : (varTotal >= 0 ? "pos" : "neg");
+        document.getElementById("kpis").innerHTML = [
+          kpi("Consumo total acumulado", fmt(total) + " MWh", "Soma mensal no recorte " + de + "–" + ate),
+          kpi("Variação " + de + " vs " + ate, fmtPct(varTotal), "Consumo anual total (todos os setores do universo)", varClass),
+          kpi("Maior consumo médio mensal", topMedia ? topMedia.setor : "—", topMedia ? fmt(topMedia.media) + " MWh / mês" : ""),
+          kpi("Maior taxa de crescimento", topCresc ? topCresc.setor : "—", topCresc ? fmtPct(topCresc.v) + " no período" : "", "pos"),
+          kpi("Mês de maior consumo médio", topMes.mes ? MES_NOME[topMes.mes - 1] : "—", fmt(topMes.media) + " MWh (média histórica do recorte)")
+        ].join("");
+      }
+      function kpi(label, value, sub, extra) {
+        return '<article class="kpi"><div class="kpi-label">' + label + '</div>' +
+          '<p class="kpi-value ' + (extra || "") + '">' + value + '</p>' +
+          '<div class="kpi-sub">' + sub + "</div></article>";
+      }
+
+      function renderTimeline(rows) {
+        const months = monthlyTotals(rows);
+        const labels = months.map(function (m) { return m.key; });
+        const data = months.map(function (m) { return m.total; });
+        const overlay = overlaySetores();
+        const datasets = [{
+          label: "Total mensal",
+          data: data,
+          borderColor: "#E8A317",
+          backgroundColor: "rgba(232,163,23,0.12)",
+          fill: overlay.length === 0,
+          tension: 0.15,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2.4
+        }];
+        overlay.forEach(function (idx, i) {
+          const y = selectedYears();
+          const map = new Map();
+          RAW.filter(function (r) {
+            return r.setorIdx === idx && r.ano >= y.de && r.ano <= y.ate;
+          }).forEach(function (r) {
+            const k = r.ano + "-" + String(r.mes).padStart(2, "0");
+            map.set(k, (map.get(k) || 0) + r.consumo);
+          });
+          datasets.push({
+            label: SETORES[idx],
+            data: labels.map(function (k) { return map.get(k) || 0; }),
+            borderColor: OVERLAY_COLORS[i % OVERLAY_COLORS.length],
+            fill: false,
+            tension: 0.15,
+            pointRadius: 0,
+            borderWidth: 1.6
+          });
+        });
+        destroyChart("timeline");
+        charts.timeline = new Chart(document.getElementById("chartTimeline"), {
+          type: "line",
+          data: { labels: labels, datasets: datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            layout: { padding: { bottom: 28, top: 26 } },
+            plugins: {
+              legend: { display: overlay.length > 0, labels: { boxWidth: 12 } },
+              datalabels: {
+                display: function (ctx) {
+                  return ctx.dataset.label === "Total mensal" ? "auto" : false;
+                },
+                formatter: function (v) { return fmtShort(v); },
+                color: "#8A5A00",
+                backgroundColor: "rgba(255,255,255,0.78)",
+                borderRadius: 4,
+                padding: { top: 2, bottom: 2, left: 4, right: 4 },
+                font: { size: 9, weight: "600" },
+                anchor: "end",
+                align: "top",
+                offset: 4,
+                clip: false
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) { return tooltipMWh(ctx); }
+                }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { display: false },
+                grid: { display: false },
+                title: { display: true, text: "Ano", padding: { top: 22 } }
+              },
+              y: {
+                title: { display: true, text: "Consumo (MWh)" },
+                ticks: { callback: function (v) { return fmt(v); } }
+              }
+            }
+          },
+          plugins: [pandemicBandPlugin, yearAxisPlugin]
+        });
+      }
+
+      function mediaMensalPorPeriodo(rows) {
+        const months = monthlyTotals(rows);
+        const acc = { "Pré-pandemia": [], "Pandemia": [], "Pós-pandemia": [] };
+        months.forEach(function (m) { acc[periodoDeAno(m.ano)].push(m.total); });
+        return PERIODO_ORDEM.map(function (p) { return { periodo: p, media: acc[p].length ? mean(acc[p]) : 0 }; });
+      }
+
+      function renderPeriodos(rows, de, ate) {
+        const tot = mediaMensalPorPeriodo(rows);
+        destroyChart("periodos");
+        charts.periodos = new Chart(document.getElementById("chartPeriodos"), {
+          type: "bar",
+          data: {
+            labels: tot.map(function (d) { return d.periodo; }),
+            datasets: [{
+              label: "Consumo médio mensal (MWh)",
+              data: tot.map(function (d) { return d.media; }),
+              backgroundColor: ["#8FB3E8", "#F0A39C", "#F3C96B"]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 22 } },
+            plugins: {
+              tooltip: { callbacks: { label: function (ctx) { return tooltipMWh(ctx); } } },
+              datalabels: barLabels()
+            },
+            scales: {
+              y: { title: { display: true, text: "MWh / mês" }, ticks: { callback: function (v) { return fmt(v); } } }
+            }
+          }
+        });
+
+        const setores = Array.from(bySetor(rows).values());
+        setores.sort(function (a, b) { return sum(b.valores) - sum(a.valores); });
+        const top = setores.slice(0, 10);
+        const pre = top.map(function (s) { return mean(Array.from(s.porPeriodoMes["Pré-pandemia"].values())); });
+        const pan = top.map(function (s) { return mean(Array.from(s.porPeriodoMes["Pandemia"].values())); });
+        const pos = top.map(function (s) { return mean(Array.from(s.porPeriodoMes["Pós-pandemia"].values())); });
+        destroyChart("periodosTop");
+        const topBox = document.getElementById("chartPeriodosTop").parentElement;
+        topBox.style.height = Math.max(360, top.length * 42) + "px";
+        charts.periodosTop = new Chart(document.getElementById("chartPeriodosTop"), {
+          type: "bar",
+          data: {
+            labels: top.map(function (s) { return s.setor.length > 34 ? s.setor.slice(0, 32) + "…" : s.setor; }),
+            datasets: [
+              { label: "Pré-pandemia", data: pre, backgroundColor: "#8FB3E8" },
+              { label: "Pandemia", data: pan, backgroundColor: "#F0A39C" },
+              { label: "Pós-pandemia", data: pos, backgroundColor: "#F3C96B" }
+            ]
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { right: 48 } },
+            plugins: {
+              datalabels: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: function (items) {
+                    const i = items[0].dataIndex;
+                    return top[i].setor;
+                  },
+                  label: function (ctx) { return tooltipMWh(ctx); }
+                }
+              }
+            },
+            scales: {
+              x: { title: { display: true, text: "MWh / mês" }, ticks: { callback: function (v) { return fmt(v); } } },
+              y: { ticks: { font: { size: 10 } } }
+            }
+          }
+        });
+
+        const body = document.querySelector("#tabelaPeriodos tbody");
+        body.innerHTML = setores.slice().sort(function (a, b) { return sum(b.valores) - sum(a.valores); }).map(function (s) {
+          const a = mean(Array.from(s.porPeriodoMes["Pré-pandemia"].values()));
+          const b = mean(Array.from(s.porPeriodoMes["Pandemia"].values()));
+          const c = mean(Array.from(s.porPeriodoMes["Pós-pandemia"].values()));
+          const vp = a ? ((b - a) / a) * 100 : null;
+          const vo = a ? ((c - a) / a) * 100 : null;
+          return "<tr><td>" + s.setor + "</td><td class='num'>" + fmt(a) + "</td><td class='num'>" + fmt(b) +
+            "</td><td class='num'>" + fmt(c) + "</td><td class='num'>" + fmtPct(vp) + "</td><td class='num'>" + fmtPct(vo) + "</td></tr>";
+        }).join("");
+      }
+
+      function renderSazonal(rows, de, ate) {
+        const months = monthlyTotals(rows);
+        const byMes = Array.from({ length: 12 }, function () { return []; });
+        const grid = new Map();
+        months.forEach(function (m) {
+          byMes[m.mes - 1].push(m.total);
+          grid.set(m.ano + "-" + m.mes, m.total);
+        });
+        const medias = byMes.map(function (arr) { return arr.length ? mean(arr) : 0; });
+        destroyChart("sazonal");
+        charts.sazonal = new Chart(document.getElementById("chartSazonal"), {
+          type: "bar",
+          data: {
+            labels: MES_NOME,
+            datasets: [{
+              label: "Consumo médio mensal (MWh)",
+              data: medias,
+              backgroundColor: medias.map(function (_, i) {
+                return i === medias.indexOf(Math.max.apply(null, medias)) ? "#E8A317" : "#8FB3E8";
+              })
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 22 } },
+            plugins: {
+              datalabels: barLabels(),
+              tooltip: { callbacks: { label: function (ctx) { return tooltipMWh(ctx); } } }
+            },
+            scales: {
+              y: {
+                title: { display: true, text: "MWh" },
+                suggestedMin: Math.min.apply(null, medias) * 0.92,
+                ticks: { callback: function (v) { return fmt(v); } }
+              }
+            }
+          }
+        });
+
+        const years = [];
+        for (let y = de; y <= ate; y++) years.push(y);
+        let vmin = Infinity, vmax = -Infinity;
+        years.forEach(function (y) {
+          MES_NOME.forEach(function (_, i) {
+            const v = grid.get(y + "-" + (i + 1));
+            if (v !== undefined) { vmin = Math.min(vmin, v); vmax = Math.max(vmax, v); }
+          });
+        });
+        let html = "<table><thead><tr><th>Ano</th>" + MES_NOME.map(function (m) { return "<th>" + m + "</th>"; }).join("") + "</tr></thead><tbody>";
+        years.forEach(function (y) {
+          html += "<tr><th>" + y + "</th>";
+          MES_NOME.forEach(function (_, i) {
+            const v = grid.get(y + "-" + (i + 1));
+            const t = v === undefined || vmax === vmin ? 0 : (v - vmin) / (vmax - vmin);
+            const title = v === undefined ? "sem dado" : fmt(v) + " MWh";
+            html += "<td title='" + title + "' style='background:" + (v === undefined ? "#F3F6FA" : heatColor(t)) +
+              ";color:" + (t > 0.55 ? "#16325C" : "#4A5A70") + "'>" + (v === undefined ? "—" : fmt(v)) + "</td>";
+          });
+          html += "</tr>";
+        });
+        html += "</tbody></table>";
+        document.getElementById("heatmap").innerHTML = html;
+      }
+
+      function buildSetorStats(rows, de, ate) {
+        return Array.from(bySetor(rows).values()).map(function (s) {
+          const total = sum(s.valores);
+          const media = mean(s.valores);
+          const varPct = variationFirstLast(s.porAno, de, ate);
+          const years = [];
+          const vals = [];
+          s.porAno.forEach(function (v, y) { years.push(y); vals.push(v); });
+          const paired = years.map(function (y, i) { return { y: y, v: vals[i] }; }).sort(function (a, b) { return a.y - b.y; });
+          const lr = linearRegression(paired.map(function (p) { return p.y; }), paired.map(function (p) { return p.v; }));
+          return {
+            idx: s.idx,
+            setor: s.setor,
+            codigo: s.codigo,
+            total: total,
+            media: media,
+            var: varPct,
+            slope: lr.slope,
+            classe: classeVar(varPct)
+            };
+        }).sort(function (a, b) { return b.total - a.total; });
+      }
+
+      function renderRanking(stats) {
+        const top15 = stats.slice(0, 15);
+        const box = document.getElementById("chartRanking").parentElement;
+        const alturaAlinhada = Math.min(740, Math.max(340, top15.length * 26 + 48));
+        box.style.height = alturaAlinhada + "px";
+        const composicaoBox = document.getElementById("chartComposicao").parentElement;
+        if (composicaoBox) composicaoBox.style.height = alturaAlinhada + "px";
+        const labels = top15.map(function (s) { return s.setor.length > 42 ? s.setor.slice(0, 40) + "…" : s.setor; });
+        destroyChart("ranking");
+        charts.ranking = new Chart(document.getElementById("chartRanking"), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Consumo médio mensal (MWh)",
+              data: top15.map(function (s) { return s.media; }),
+              backgroundColor: "#F3C96B",
+              borderWidth: 0
+            }]
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { right: 52 } },
+            onClick: function (evt, els) {
+              if (!els.length) return;
+              const idx = top15[els[0].index].idx;
+              const chip = document.querySelector('#setorChips .chip[data-idx="' + idx + '"]');
+              if (chip) {
+                chip.classList.toggle("selected");
+                updateSetorCount();
+                renderAll();
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              datalabels: barLabels({ align: "right", anchor: "end", font: { size: 9, weight: "600" } }),
+              tooltip: {
+                callbacks: {
+                  title: function (items) { return top15[items[0].dataIndex].setor; },
+                  label: function (ctx) { return tooltipMWh(ctx); },
+                  afterLabel: function () { return "Clique para incluir/remover da comparação"; }
+                }
+              }
+            },
+            scales: {
+              x: { title: { display: true, text: "MWh / mês" }, ticks: { callback: function (v) { return fmt(v); } } },
+              y: { ticks: { font: { size: 10 } } }
+            }
+          }
+        });
+
+        const grand = sum(stats.map(function (s) { return s.total; })) || 1;
+        const topN = stats.slice(0, 8);
+        const outros = grand - sum(topN.map(function (s) { return s.total; }));
+        const pal = ["#F3C96B","#F0B27A","#8FB3E8","#8FD3B0","#C5B3F0","#7FD3CE","#F0A39C","#9BB8E8","#C5CDD8"];
+        destroyChart("composicao");
+        charts.composicao = new Chart(document.getElementById("chartComposicao"), {
+          type: "bar",
+          data: {
+            labels: ["Participação no consumo total"],
+            datasets: topN.map(function (s, i) {
+              return {
+                label: s.setor.length > 36 ? s.setor.slice(0, 34) + "…" : s.setor,
+                data: [(s.total / grand) * 100],
+                backgroundColor: pal[i % pal.length]
+              };
+            }).concat([{
+              label: "Outros",
+              data: [(outros / grand) * 100],
+              backgroundColor: pal[pal.length - 1]
+            }])
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              datalabels: {
+                display: true,
+                color: "#16325C",
+                font: { size: 10, weight: "600" },
+                formatter: function (v) { return v < 4 ? "" : fmt(v) + "%"; }
+              },
+              tooltip: {
+                callbacks: {
+                  title: function (items) {
+                    const i = items[0].datasetIndex;
+                    return i < topN.length ? topN[i].setor : "Outros";
+                  },
+                  label: function (ctx) {
+                    return ctx.dataset.label + ": " + fmt(ctx.parsed.x) + "%";
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                stacked: true,
+                max: 100,
+                title: { display: true, text: "Participação (%)" },
+                ticks: { callback: function (v) { return fmt(v); } }
+              },
+              y: { stacked: true }
+            }
+          }
+        });
+
+        tableState.rows = stats;
+        drawTable();
+      }
+
+      function drawTable() {
+        const key = tableState.key;
+        const dir = tableState.dir;
+        const rows = tableState.rows.slice().sort(function (a, b) {
+          const va = a[key], vb = b[key];
+          if (typeof va === "string") return dir * String(va).localeCompare(String(vb), "pt-BR");
+          const na = va === null ? -Infinity : va;
+          const nb = vb === null ? -Infinity : vb;
+          return dir * (na - nb);
+        });
+        document.querySelector("#tabelaSetores tbody").innerHTML = rows.map(function (s) {
+          const tag = s.classe === "crescente" ? "up" : s.classe === "decrescente" ? "down" : "flat";
+          return "<tr><td>" + s.setor + "</td><td class='num'>" + fmt(s.media) + "</td><td class='num'>" +
+            fmt(s.total) + "</td><td class='num'>" + fmtPct(s.var) + "</td><td><span class='tag " + tag + "'>" +
+            s.classe + "</span></td></tr>";
+        }).join("");
+      }
+
+      function renderGrowth(stats) {
+        const withVar = stats.filter(function (s) { return s.var !== null; });
+        const up = withVar.slice().sort(function (a, b) { return b.var - a.var; }).slice(0, 5);
+        const down = withVar.slice().sort(function (a, b) { return a.var - b.var; }).slice(0, 5);
+        function list(arr, pos) {
+          const maxAbs = Math.max.apply(null, arr.map(function (s) { return Math.abs(s.var); })) || 1;
+          return arr.map(function (s) {
+            const w = (Math.abs(s.var) / maxAbs) * 100;
+            return '<div class="bar-row"><div><div>' + s.setor + '</div><div class="track"><div class="fill" style="width:' +
+              w + "%;background:" + (pos ? "#2E9E62" : "#E05A4F") + '"></div></div></div><div class="num">' + fmtPct(s.var) + "</div></div>";
+          }).join("");
+        }
+        document.getElementById("topCresc").innerHTML = list(up, true);
+        document.getElementById("topQueda").innerHTML = list(down, false);
+
+        destroyChart("scatter");
+        charts.scatter = new Chart(document.getElementById("chartScatter"), {
+          type: "scatter",
+          data: {
+            datasets: [{
+              label: "Setores",
+              data: withVar.map(function (s) { return { x: s.media, y: s.var, setor: s.setor, idx: s.idx }; }),
+              backgroundColor: withVar.map(function (s) { return s.var >= 0 ? "rgba(46,158,98,0.8)" : "rgba(224,90,79,0.8)"; })
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            onClick: function (evt, els) {
+              if (!els.length) return;
+              const p = charts.scatter.data.datasets[0].data[els[0].index];
+              const chip = document.querySelector('#setorChips .chip[data-idx="' + p.idx + '"]');
+              if (chip) {
+                chip.classList.toggle("selected");
+                updateSetorCount();
+                renderAll();
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              datalabels: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    const pt = ctx.raw;
+                    return pt.setor + " · média " + fmt(pt.x) + " MWh · variação " + fmtPct(pt.y);
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { title: { display: true, text: "Consumo médio mensal (MWh) — tamanho do setor" }, ticks: { callback: function (v) { return fmt(v); } } },
+              y: { title: { display: true, text: "Variação % (1º vs último ano)" }, ticks: { callback: function (v) { return fmt(v); } } }
+            }
+          }
+        });
+      }
+
+      function renderComparacao() {
+        const marked = markedSetores();
+        const vazio = document.getElementById("comparacaoVazio");
+        const conteudo = document.getElementById("comparacaoConteudo");
+        if (marked.length < 2) {
+          vazio.hidden = false;
+          conteudo.hidden = true;
+          destroyChart("comparacao");
+          destroyChart("comparacaoPeriodo");
+          return;
+        }
+        vazio.hidden = true;
+        conteudo.hidden = false;
+        const y = selectedYears();
+        const rowsCmp = marked.map(function (idx) {
+          const vals = RAW.filter(function (r) {
+            return r.setorIdx === idx && r.ano >= y.de && r.ano <= y.ate;
+          });
+          const acc = { "Pré-pandemia": [], "Pandemia": [], "Pós-pandemia": [] };
+          vals.forEach(function (r) { acc[r.periodo].push(r.consumo); });
+          return {
+            idx: idx,
+            nome: SETORES[idx],
+            media: mean(vals.map(function (r) { return r.consumo; })),
+            pre: mean(acc["Pré-pandemia"]),
+            pan: mean(acc["Pandemia"]),
+            pos: mean(acc["Pós-pandemia"])
+          };
+        }).sort(function (a, b) { return b.media - a.media; });
+        const h = Math.max(280, rowsCmp.length * 28 + 80);
+        document.getElementById("chartComparacao").parentElement.style.height = h + "px";
+        document.getElementById("chartComparacaoPeriodo").parentElement.style.height = Math.max(320, rowsCmp.length * 36 + 90) + "px";
+        const showLabels = rowsCmp.length <= 10;
+        const labels = rowsCmp.map(function (r) {
+          return r.nome.length > 40 ? r.nome.slice(0, 38) + "…" : r.nome;
+        });
+        destroyChart("comparacao");
+        charts.comparacao = new Chart(document.getElementById("chartComparacao"), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Consumo médio mensal (MWh)",
+              data: rowsCmp.map(function (r) { return r.media; }),
+              backgroundColor: "#8FB3E8"
+            }]
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { right: 56 } },
+            plugins: {
+              legend: { display: false },
+              datalabels: barLabels({
+                align: "right",
+                anchor: "end",
+                display: showLabels,
+                font: { size: 10, weight: "600" }
+              }),
+              tooltip: {
+                callbacks: {
+                  title: function (items) { return rowsCmp[items[0].dataIndex].nome; },
+                  label: function (ctx) { return tooltipMWh(ctx); }
+                }
+              }
+            },
+            scales: {
+              x: { title: { display: true, text: "MWh / mês" }, ticks: { callback: function (v) { return fmt(v); } } },
+              y: { ticks: { font: { size: 11 } } }
+            }
+          }
+        });
+        destroyChart("comparacaoPeriodo");
+        charts.comparacaoPeriodo = new Chart(document.getElementById("chartComparacaoPeriodo"), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              { label: "Pré-pandemia", data: rowsCmp.map(function (r) { return r.pre; }), backgroundColor: "#8FB3E8" },
+              { label: "Pandemia", data: rowsCmp.map(function (r) { return r.pan; }), backgroundColor: "#F0A39C" },
+              { label: "Pós-pandemia", data: rowsCmp.map(function (r) { return r.pos; }), backgroundColor: "#F3C96B" }
+            ]
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { right: 16 } },
+            plugins: {
+              datalabels: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: function (items) { return rowsCmp[items[0].dataIndex].nome; },
+                  label: function (ctx) { return tooltipMWh(ctx); }
+                }
+              }
+            },
+            scales: {
+              x: { title: { display: true, text: "MWh / mês" }, ticks: { callback: function (v) { return fmt(v); } } },
+              y: { ticks: { font: { size: 11 } } }
+            }
+          }
+        });
+      }
+
+      function renderInsights(rows, stats, de, ate) {
+        const months = monthlyTotals(rows);
+        const byYear = new Map();
+        months.forEach(function (m) { byYear.set(m.ano, (byYear.get(m.ano) || 0) + m.total); });
+        const varTotal = variationFirstLast(byYear, de, ate);
+        const resposta = varTotal === null ? "não foi possível calcular a variação"
+          : (varTotal > 5 ? "sim, houve crescimento" : varTotal < -5 ? "não: o consumo recuou" : "o nível ficou relativamente estável");
+        const per = mediaMensalPorPeriodo(rows);
+        const pre = per[0].media, pan = per[1].media, pos = per[2].media;
+        const quedaPan = pre ? ((pan - pre) / pre) * 100 : null;
+        const recPos = pre ? ((pos - pre) / pre) * 100 : null;
+
+        let maisAfetado = null;
+        let maisAfetadoAbs = null;
+        bySetor(rows).forEach(function (raw) {
+          const a = mean(Array.from(raw.porPeriodoMes["Pré-pandemia"].values()));
+          const b = mean(Array.from(raw.porPeriodoMes["Pandemia"].values()));
+          if (!a) return;
+          const v = ((b - a) / a) * 100;
+          const abs = a - b;
+          if (!maisAfetado || v < maisAfetado.v) maisAfetado = { setor: raw.setor, v: v };
+          if (abs > 0 && (!maisAfetadoAbs || abs > maisAfetadoAbs.abs)) {
+            maisAfetadoAbs = { setor: raw.setor, abs: abs, v: v };
+          }
+        });
+
+        const byMes = Array.from({ length: 12 }, function () { return []; });
+        months.forEach(function (m) { byMes[m.mes - 1].push(m.total); });
+        const medias = byMes.map(mean);
+        const idxMax = medias.reduce(function (best, v, i) { return v > medias[best] ? i : best; }, 0);
+        const idxMin = medias.reduce(function (best, v, i) { return v < medias[best] ? i : best; }, 0);
+        const top = stats[0];
+        const up = stats.filter(function (s) { return s.var !== null; }).sort(function (a, b) { return b.var - a.var; })[0];
+        const down = stats.filter(function (s) { return s.var !== null; }).sort(function (a, b) { return a.var - b.var; })[0];
+        const nCresc = stats.filter(function (s) { return s.classe === "crescente"; }).length;
+        const nDec = stats.filter(function (s) { return s.classe === "decrescente"; }).length;
+        const nMark = markedSetores().length;
+
+        const items = [
+          "No recorte " + de + "–" + ate + ", o consumo total variou " + fmtPct(varTotal) +
+            " entre o primeiro e o último ano. Em resposta à pergunta de pesquisa: <strong>" + resposta + "</strong>.",
+          "O consumo médio mensal foi de " + fmt(pre) + " MWh no pré-pandemia, " + fmt(pan) +
+            " MWh em 2020 (" + fmtPct(quedaPan) + " vs pré) e " + fmt(pos) + " MWh no pós-pandemia (" +
+            fmtPct(recPos) + " vs pré).",
+          maisAfetado ? "Em variação percentual, o setor mais afetado na pandemia (média mensal vs pré) foi <strong>" +
+            maisAfetado.setor + "</strong> (" + fmtPct(maisAfetado.v) + ")." +
+            (maisAfetadoAbs ? " Em volume absoluto, a maior perda mensal foi <strong>" + maisAfetadoAbs.setor +
+            "</strong> (" + fmt(maisAfetadoAbs.abs) + " MWh/mês, " + fmtPct(maisAfetadoAbs.v) + ")." : "") : "",
+          "O mês historicamente com maior consumo médio no recorte é <strong>" + MES_NOME[idxMax] + "</strong> (" +
+            fmt(medias[idxMax]) + " MWh); o menor é " + MES_NOME[idxMin] + " (" + fmt(medias[idxMin]) + " MWh).",
+          top ? "O setor de maior peso é <strong>" + top.setor + "</strong>, com média mensal de " +
+            fmt(top.media) + " MWh e " + fmt(top.total) + " MWh acumulados no recorte." : "",
+          up && down ? "A maior expansão foi " + up.setor + " (" + fmtPct(up.var) + ") e a maior retração foi " +
+            down.setor + " (" + fmtPct(down.var) + "). " + nCresc + " setor(es) classificado(s) como crescente(s) e " +
+            nDec + " como decrescente(s) (limiar ±5%)." : "",
+          nMark ? ("Comparação ativa: " + nMark + " setor(es) marcado(s). Até 8 aparecem como linhas na linha do tempo.") : ""
+        ].filter(Boolean);
+      }
+
+      function updateSetorCount() {
+        const marked = markedSetores();
+        const n = marked.length;
+        const el = document.getElementById("setorCount");
+        if (!n) el.textContent = "0 marcados — mostrando o total da indústria";
+        else if (n === 1) el.textContent = "1 setor marcado — escolha pelo menos 2 para comparar";
+        else el.textContent = n + " setores marcados" + (n > 8 ? " (a linha do tempo mostra os 8 primeiros)" : "");
+        const fila = document.getElementById("setoresSelecionados");
+        fila.innerHTML = marked.map(function (idx) {
+          const nome = SETORES[idx].length > 42 ? SETORES[idx].slice(0, 40) + "…" : SETORES[idx];
+          return '<span class="tag-sel">' + CODIGOS[idx] + " · " + nome +
+            ' <button type="button" data-remove="' + idx + '" aria-label="Remover">×</button></span>';
+        }).join("");
+      }
+
+      function abrirListaSetores(abrir) {
+        const painel = document.getElementById("setorPainel");
+        const btn = document.getElementById("btnAbrirSetores");
+        const on = abrir === undefined ? !painel.classList.contains("open") : !!abrir;
+        painel.classList.toggle("open", on);
+        btn.textContent = on ? "Ocultar lista de setores" : "Selecionar / buscar setores";
+        if (on) {
+          const busca = document.getElementById("buscaSetor");
+          busca.focus();
+        }
+      }
+
+      function renderAll() {
+        const y = selectedYears();
+        const rows = filteredRows();
+        const stats = buildSetorStats(rows, y.de, y.ate);
+        updateSetorCount();
+        renderKpis(rows, y.de, y.ate);
+        renderTimeline(rows);
+        renderComparacao();
+        renderPeriodos(rows, y.de, y.ate);
+        renderSazonal(rows, y.de, y.ate);
+        renderRanking(stats);
+        renderGrowth(stats);
+        renderInsights(rows, stats, y.de, y.ate);
+      }
+
+      function fillControls() {
+        const anos = Array.from(new Set(RAW.map(function (r) { return r.ano; }))).sort();
+        const de = document.getElementById("anoDe");
+        const ate = document.getElementById("anoAte");
+        de.innerHTML = anos.map(function (a) { return "<option value='" + a + "'>" + a + "</option>"; }).join("");
+        ate.innerHTML = de.innerHTML;
+        de.value = String(anos[0]);
+        ate.value = String(anos[anos.length - 1]);
+        const box = document.getElementById("setorChips");
+        box.innerHTML = SETORES.map(function (s, i) {
+          const label = CODIGOS[i] + " · " + s;
+          return '<button type="button" class="chip" data-idx="' + i + '" title="' + String(s).replace(/"/g, "&quot;") + '">' + label + "</button>";
+        }).join("");
+      }
+
+      document.getElementById("anoDe").addEventListener("change", renderAll);
+      document.getElementById("anoAte").addEventListener("change", renderAll);
+      document.getElementById("restringirSetores").addEventListener("change", renderAll);
+      document.getElementById("btnAbrirSetores").addEventListener("click", function () {
+        abrirListaSetores();
+      });
+      document.getElementById("btnFecharSetores").addEventListener("click", function () {
+        abrirListaSetores(false);
+      });
+      document.getElementById("setorChips").addEventListener("click", function (e) {
+        const chip = e.target.closest(".chip");
+        if (!chip) return;
+        chip.classList.toggle("selected");
+        renderAll();
+      });
+      document.getElementById("setoresSelecionados").addEventListener("click", function (e) {
+        const btn = e.target.closest("[data-remove]");
+        if (!btn) return;
+        const chip = document.querySelector('#setorChips .chip[data-idx="' + btn.getAttribute("data-remove") + '"]');
+        if (chip) chip.classList.remove("selected");
+        renderAll();
+      });
+      document.getElementById("buscaSetor").addEventListener("input", function () {
+        const q = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        Array.from(document.querySelectorAll("#setorChips .chip")).forEach(function (chip) {
+          const txt = chip.textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          chip.classList.toggle("hidden", q && txt.indexOf(q) < 0);
+        });
+      });
+      document.getElementById("btnTodos").addEventListener("click", function () {
+        Array.from(document.querySelectorAll("#setorChips .chip")).forEach(function (c) {
+          if (!c.classList.contains("hidden")) c.classList.add("selected");
+        });
+        renderAll();
+      });
+      document.getElementById("btnLimparOverlay").addEventListener("click", function () {
+        Array.from(document.querySelectorAll("#setorChips .chip")).forEach(function (c) { c.classList.remove("selected"); });
+        document.getElementById("restringirSetores").checked = false;
+        renderAll();
+      });
+      document.querySelectorAll("#tabelaSetores th[data-key]").forEach(function (th) {
+        th.addEventListener("click", function () {
+          const key = th.getAttribute("data-key");
+          if (tableState.key === key) tableState.dir *= -1;
+          else { tableState.key = key; tableState.dir = key === "setor" || key === "classe" ? 1 : -1; }
+          drawTable();
+        });
+      });
+
+      expandPayload(window.__DASHBOARD_PAYLOAD__);
+      fillControls();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
